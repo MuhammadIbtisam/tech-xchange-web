@@ -1,0 +1,206 @@
+import React, { useState } from 'react';
+import { Form, Input, Button, Card, Typography, message, Divider, Select, Radio } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, ShopOutlined } from '@ant-design/icons';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
+const { Option } = Select;
+
+const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState('buyer');
+
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: values.fullName,
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+          password: values.password,
+          role: role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        message.success(`Registration successful! Welcome to TechXchange, ${data.user.fullName}!`);
+        onRegisterSuccess(data.user);
+      } else {
+        message.error(data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      message.error('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <Card className="w-full max-w-md shadow-2xl border-0">
+        <div className="text-center mb-8">
+          <div className="text-4xl mb-4">🌟</div>
+          <Title level={2} className="mb-2 text-gray-800">
+            TechXchange
+          </Title>
+          <Text className="text-gray-600 text-lg">
+            Join our community! Create your account
+          </Text>
+        </div>
+
+        <Form
+          name="register"
+          layout="vertical"
+          onFinish={onFinish}
+          autoComplete="off"
+          size="large"
+        >
+          <Form.Item
+            name="fullName"
+            rules={[
+              { required: true, message: 'Please input your full name!' },
+              { min: 2, message: 'Name must be at least 2 characters!' }
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="text-gray-400" />}
+              placeholder="Full name"
+              className="h-12 rounded-lg"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: 'Please input your email!' },
+              { type: 'email', message: 'Please enter a valid email!' }
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined className="text-gray-400" />}
+              placeholder="Email address"
+              className="h-12 rounded-lg"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="phoneNumber"
+            rules={[
+              { required: true, message: 'Please input your phone number!' },
+              { pattern: /^[+]?[0-9\s\-()]+$/, message: 'Please enter a valid phone number!' }
+            ]}
+          >
+            <Input
+              prefix={<PhoneOutlined className="text-gray-400" />}
+              placeholder="Phone number"
+              className="h-12 rounded-lg"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: 'Please input your password!' },
+              { min: 6, message: 'Password must be at least 6 characters!' }
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="text-gray-400" />}
+              placeholder="Password"
+              className="h-12 rounded-lg"
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="confirmPassword"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Please confirm your password!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Passwords do not match!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="text-gray-400" />}
+              placeholder="Confirm password"
+              className="h-12 rounded-lg"
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            />
+          </Form.Item>
+
+          <Form.Item label="I want to:" className="mb-6">
+            <Radio.Group 
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <Radio.Button 
+                  value="buyer" 
+                  className="w-full text-center h-12 flex items-center justify-center border-2 hover:border-blue-500"
+                >
+                  <UserOutlined className="mr-2" />
+                  Buy Products
+                </Radio.Button>
+                <Radio.Button 
+                  value="seller" 
+                  className="w-full text-center h-12 flex items-center justify-center border-2 hover:border-blue-500"
+                >
+                  <ShopOutlined className="mr-2" />
+                  Sell Products
+                </Radio.Button>
+              </div>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 border-0 text-white font-medium text-lg"
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <Divider className="text-gray-400">or</Divider>
+
+        <div className="text-center">
+          <Text className="text-gray-600">
+            Already have an account?{' '}
+          </Text>
+          <Button
+            type="link"
+            onClick={onSwitchToLogin}
+            className="text-blue-600 hover:text-blue-800 p-0 font-medium"
+          >
+            Sign in now
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default RegisterForm;
