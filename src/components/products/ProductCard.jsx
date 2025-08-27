@@ -329,8 +329,8 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, viewMode = 'grid' }
   // Grid View (default)
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 group h-full">
-      {/* Product Image */}
-      <div className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden rounded-t-lg">
+      {/* Product Image - Mobile Optimized */}
+      <div className="relative h-32 sm:h-40 lg:h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden rounded-t-lg">
         {product.images && product.images.length > 0 ? (
           <Image
             alt={product.productTypeId?.name || product.name}
@@ -386,11 +386,11 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, viewMode = 'grid' }
         )}
       </div>
 
-      {/* Product Content */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col">
+      {/* Product Content - Mobile Optimized */}
+      <div className="p-2 sm:p-3 lg:p-4 flex-1 flex flex-col">
         {/* Product Info */}
         <div className="flex-1">
-          <h4 className="font-semibold text-gray-800 text-sm sm:text-base mb-1 line-clamp-2">
+          <h4 className="font-semibold text-gray-800 text-xs sm:text-sm lg:text-base mb-1 line-clamp-2">
             {product.productTypeId?.name || product.name}
           </h4>
           <p className="text-xs text-gray-500 mb-2 truncate">
@@ -405,9 +405,9 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, viewMode = 'grid' }
             </div>
           )}
 
-          {/* Price */}
-          <div className="mb-3">
-            <div className="text-lg font-bold text-green-600">
+          {/* Price - Mobile Optimized */}
+          <div className="mb-2 lg:mb-3">
+            <div className="text-base sm:text-lg font-bold text-green-600">
               {formatPrice(product.price)}
             </div>
             {product.currency && (
@@ -416,8 +416,8 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, viewMode = 'grid' }
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 mt-auto">
+        {/* Action Buttons - Mobile Optimized */}
+        <div className="flex items-center gap-1 sm:gap-2 mt-auto">
           {/* Buy Button for Buyers */}
           {isBuyer && (
             <Button 
@@ -428,7 +428,7 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, viewMode = 'grid' }
               disabled={product.stock === 0}
               className="text-xs flex-1"
             >
-              {product.stock === 0 ? 'Out of Stock' : 'Buy Now'}
+              {product.stock === 0 ? 'Out of Stock' : 'Buy'}
             </Button>
           )}
           

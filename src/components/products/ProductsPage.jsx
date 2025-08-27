@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Input, 
   Select, 
@@ -69,7 +69,7 @@ const ProductsPage = () => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Debounce timer for search
-  const [searchTimer, setSearchTimer] = useState(null);
+  const searchTimerRef = useRef(null);
 
   // Load initial data
   useEffect(() => {
@@ -86,8 +86,8 @@ const ProductsPage = () => {
 
   // Debounced search effect
   useEffect(() => {
-    if (searchTimer) {
-      clearTimeout(searchTimer);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
     }
 
     const timer = setTimeout(() => {
@@ -98,7 +98,7 @@ const ProductsPage = () => {
       }
     }, 500); // 500ms delay
 
-    setSearchTimer(timer);
+    searchTimerRef.current = timer;
 
     return () => {
       if (timer) {
@@ -119,11 +119,6 @@ const ProductsPage = () => {
     }
   }, [pageSize, totalProducts, currentPage]);
 
-  // Debug effect to see when page changes
-  useEffect(() => {
-    console.log('🔄 Current page changed to:', currentPage);
-  }, [currentPage]);
-
   // Debug logging for page and page size changes
   useEffect(() => {
     console.log('🔄 Current page changed to:', currentPage);
@@ -135,8 +130,8 @@ const ProductsPage = () => {
 
   // Debounced price range effect
   useEffect(() => {
-    if (searchTimer) {
-      clearTimeout(searchTimer);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
     }
 
     const timer = setTimeout(() => {
@@ -145,7 +140,7 @@ const ProductsPage = () => {
       loadProducts().finally(() => setApplyingFilters(false));
     }, 800); // 800ms delay for price range
 
-    setSearchTimer(timer);
+    searchTimerRef.current = timer;
 
     return () => {
       if (timer) {
@@ -339,15 +334,31 @@ const ProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-6 sm:py-8 md:py-12 px-4 sm:px-6">
+      {/* Mobile Top Bar - Search Only */}
+      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4">
+        <div className="flex items-center justify-center">
+          {/* Search Bar */}
+          <div className="w-full max-w-md">
+            <Search
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full"
+              size="small"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Hero Section */}
+      <div className="hidden lg:block bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-8 md:py-12 px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <Title level={1} className="text-white mb-3 sm:mb-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+          <Title level={1} className="text-white mb-4 text-3xl md:text-4xl lg:text-5xl">
             {isAdmin ? 'Admin Dashboard' : 
              isSeller ? 'My Product Store' : 
              'Discover Amazing Tech Products'}
           </Title>
-          <Paragraph className="text-blue-100 text-base sm:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+          <Paragraph className="text-blue-100 text-lg md:text-xl mb-8">
             {isAdmin ? 'Manage all products and approve new listings' :
              isSeller ? 'Manage your product catalog and track sales' :
              'Browse thousands of high-quality technology products from trusted sellers'}
@@ -359,7 +370,7 @@ const ProductsPage = () => {
               placeholder="Search for products, brands, or categories..."
               allowClear
               enterButton={
-                <Button type="primary" size="large" icon={<SearchOutlined />} className="hidden sm:inline-flex">
+                <Button type="primary" size="large" icon={<SearchOutlined />}>
                   Search
                 </Button>
               }
@@ -373,16 +384,16 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Categories Section - Horizontal Scrollable List */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        {/* Categories Section - Mobile Optimized */}
+        <div className="mb-4 lg:mb-6">
+          <div className="flex items-center justify-between mb-2 lg:mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 lg:w-5 lg:h-5 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center">
                 <FireOutlined className="text-white text-xs" />
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-                Shop by Category
+              <h3 className="text-sm lg:text-lg font-semibold text-gray-800">
+                Categories
               </h3>
             </div>
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -390,25 +401,25 @@ const ProductsPage = () => {
             </span>
           </div>
           
-          {/* Horizontal Scrollable Categories */}
+          {/* Horizontal Scrollable Categories - Mobile Optimized */}
           <div className="relative">
-            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+            <div className="flex gap-2 lg:gap-3 overflow-x-auto pb-2 lg:pb-3 scrollbar-hide">
               {categories.map(category => (
                 <div
                   key={category._id}
-                  className={`flex-shrink-0 w-16 sm:w-20 cursor-pointer transition-all duration-200 group ${
+                  className={`flex-shrink-0 w-14 h-16 lg:w-20 lg:h-20 cursor-pointer transition-all duration-200 group ${
                     selectedCategory === category._id 
                       ? 'scale-105' 
                       : 'hover:scale-102'
                   }`}
                   onClick={() => handleCategoryClick(category._id)}
                 >
-                  <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-1.5 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                  <div className={`w-14 h-14 lg:w-20 lg:h-20 mx-auto mb-1 lg:mb-1.5 rounded-lg flex items-center justify-center transition-all duration-200 ${
                     selectedCategory === category._id 
                       ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md ring-1 ring-blue-300' 
                       : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-blue-50 group-hover:to-indigo-50 border border-gray-200'
                   }`}>
-                    <span className="text-lg sm:text-xl">
+                    <span className="text-base lg:text-xl">
                       {category.icon || '📱'}
                     </span>
                   </div>
@@ -424,20 +435,20 @@ const ProductsPage = () => {
             </div>
             
             {/* Scroll Indicators */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-8 lg:w-8 lg:h-8 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-8 lg:w-8 lg:h-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
           </div>
         </div>
 
-        {/* Brands Section - Horizontal Scrollable List */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
+        {/* Brands Section - Mobile Optimized */}
+        <div className="mb-4 lg:mb-6">
+          <div className="flex items-center justify-between mb-2 lg:mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 lg:w-5 lg:h-5 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
                 <StarOutlined className="text-white text-xs" />
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-                Popular Brands
+              <h3 className="text-sm lg:text-lg font-semibold text-gray-800">
+                Brands
               </h3>
             </div>
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -445,9 +456,9 @@ const ProductsPage = () => {
             </span>
           </div>
           
-          {/* Horizontal Scrollable Brands */}
+          {/* Horizontal Scrollable Brands - Mobile Optimized */}
           <div className="relative">
-            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+            <div className="flex gap-2 lg:gap-3 overflow-x-auto pb-2 lg:pb-3 scrollbar-hide">
               {brands.map(brand => (
                 <div
                   key={brand._id}
@@ -703,9 +714,9 @@ const ProductsPage = () => {
               )}
             </div>
             
-            {/* Products Grid/List */}
+            {/* Products Grid/List - Mobile Optimized */}
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                 {products.map(product => (
                   <div key={product._id} className="group">
                     <ProductCard
@@ -872,6 +883,8 @@ const ProductsPage = () => {
             className="py-12 sm:py-16"
           />
         )}
+
+
       </div>
     </div>
   );

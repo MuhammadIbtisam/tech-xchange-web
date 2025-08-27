@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Menu, Button, Typography, Space, Avatar, Dropdown } from 'antd';
-import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined } from '@ant-design/icons';
+import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthPage from './components/auth/AuthPage';
@@ -16,6 +16,7 @@ const AppContent = () => {
   const { user, isAuthenticated, isSeller, isBuyer, logout, login, register } = useAuth();
   const [selectedKey, setSelectedKey] = React.useState('1');
   const [collapsed, setCollapsed] = React.useState(false);
+  const [sidebarVisible, setSidebarVisible] = React.useState(false);
 
   // If not authenticated, show auth page
   if (!isAuthenticated) {
@@ -93,14 +94,34 @@ const AppContent = () => {
 
   return (
     <Layout className="min-h-screen">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarVisible && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setSidebarVisible(false)}
+        />
+      )}
+      
       <Sider 
         collapsible 
         collapsed={collapsed} 
         onCollapse={(value) => setCollapsed(value)}
-        className="bg-gradient-to-b from-white to-gray-50 shadow-xl"
+        className={`bg-gradient-to-b from-white to-gray-50 shadow-xl transition-transform duration-300 ${
+          sidebarVisible ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        } lg:relative fixed left-0 top-0 h-full z-50`}
         theme="light"
+        width={256}
       >
-        <div className="p-6 text-center">
+        <div className="p-6 text-center relative">
+          {/* Mobile Close Button */}
+          <Button
+            type="text"
+            icon={<CloseOutlined />}
+            onClick={() => setSidebarVisible(false)}
+            className="lg:hidden absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            size="small"
+          />
+          
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl mx-auto mb-3 flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">TX</span>
           </div>
@@ -114,7 +135,13 @@ const AppContent = () => {
           mode="inline"
           selectedKeys={[selectedKey]}
           items={menuItems}
-          onClick={({ key }) => setSelectedKey(key)}
+          onClick={({ key }) => {
+            setSelectedKey(key);
+            // Close sidebar on mobile when menu item is clicked
+            if (window.innerWidth < 1024) {
+              setSidebarVisible(false);
+            }
+          }}
           className="border-r-0 px-3"
           style={{
             background: 'transparent',
@@ -130,6 +157,15 @@ const AppContent = () => {
             <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full translate-x-12 -translate-y-12"></div>
             <div className="absolute bottom-0 left-1/4 w-20 h-20 bg-white rounded-full -translate-x-10 translate-y-10"></div>
           </div>
+          
+          {/* Mobile Menu Toggle */}
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+            className="lg:hidden text-white hover:text-blue-200 hover:bg-white/10"
+            size="large"
+          />
           
           {/* Page Title with Icon */}
           <div className="flex items-center gap-3 relative z-10">
@@ -179,7 +215,7 @@ const AppContent = () => {
         </Header>
         
         <Content className="bg-gray-50">
-          <div className="max-w-6xl mx-auto p-6 pt-6">
+          <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6 pt-6">
             {renderContent()}
           </div>
         </Content>
