@@ -42,14 +42,14 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-4">🌟</div>
-          <Title level={2} className="mb-2 text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4 lg:p-6">
+      <Card className="w-full max-w-sm sm:max-w-lg xl:max-w-xl shadow-2xl border-0 mx-2 sm:mx-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="text-3xl sm:text-4xl lg:text-5xl mb-4">🌟</div>
+          <Title level={2} className="mb-2 text-gray-800 text-xl sm:text-2xl lg:text-3xl">
             TechXchange
           </Title>
-          <Text className="text-gray-600 text-lg">
+          <Text className="text-gray-600 text-base sm:text-lg">
             Join our community! Create your account
           </Text>
         </div>
@@ -60,6 +60,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
           onFinish={onFinish}
           autoComplete="off"
           size="large"
+          className="space-y-3 sm:space-y-4"
         >
           <Form.Item
             name="fullName"
@@ -71,7 +72,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             <Input
               prefix={<UserOutlined className="text-gray-400" />}
               placeholder="Full name"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
             />
           </Form.Item>
 
@@ -85,7 +86,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             <Input
               prefix={<MailOutlined className="text-gray-400" />}
               placeholder="Email address"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
             />
           </Form.Item>
 
@@ -99,7 +100,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             <Input
               prefix={<PhoneOutlined className="text-gray-400" />}
               placeholder="Phone number"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
             />
           </Form.Item>
 
@@ -117,7 +118,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             <Input.Password
               prefix={<LockOutlined className="text-gray-400" />}
               placeholder="Password"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
               iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
@@ -140,27 +141,27 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             <Input.Password
               prefix={<LockOutlined className="text-gray-400" />}
               placeholder="Confirm password"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
               iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
 
-          <Form.Item name='role' label="I want to:" className="mb-6" rules={[{ required: true, message: 'Please select your role!' }]}>
+          <Form.Item name='role' label="I want to:" className="mb-4 sm:mb-6" rules={[{ required: true, message: 'Please select your role!' }]}>
             <Radio.Group className="w-full">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <Radio.Button 
                   value="buyer" 
-                  className="w-full text-center h-12 flex items-center justify-center border-2 hover:border-blue-500"
+                  className="w-full text-center h-10 sm:h-12 flex items-center justify-center border-2 hover:border-blue-500 transition-all duration-200"
                 >
-                  <UserOutlined className="mr-2" />
-                  Buy Products
+                  <UserOutlined className="mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Buy Products</span>
                 </Radio.Button>
                 <Radio.Button 
                   value="seller" 
-                  className="w-full text-center h-12 flex items-center justify-center border-2 hover:border-blue-500"
+                  className="w-full text-center h-10 sm:h-12 flex items-center justify-center border-2 hover:border-blue-500 transition-all duration-200"
                 >
-                  <ShopOutlined className="mr-2" />
-                  Sell Products
+                  <ShopOutlined className="mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Sell Products</span>
                 </Radio.Button>
               </div>
             </Radio.Group>
@@ -171,16 +172,16 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 border-0 text-white font-medium text-lg"
+              className="w-full h-10 sm:h-12 rounded-lg bg-blue-600 hover:bg-blue-700 border-0 text-white font-medium text-base sm:text-lg transition-all duration-200"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </Form.Item>
         </Form>
 
-        <Divider className="text-gray-400">or</Divider>
+        <Divider className="text-gray-400 my-4 sm:my-6">or</Divider>
 
-        <div className="text-center">
+        <div className="text-center mt-4 sm:mt-6">
           <Text className="text-gray-600">
             Already have an account?{' '}
           </Text>

@@ -45,14 +45,14 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-4">🚀</div>
-          <Title level={2} className="mb-2 text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4 lg:p-6">
+      <Card className="w-full max-w-sm sm:max-w-lg xl:max-w-xl shadow-2xl border-0 mx-2 sm:mx-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="text-3xl sm:text-4xl lg:text-5xl mb-4">🚀</div>
+          <Title level={2} className="mb-2 text-gray-800 text-xl sm:text-2xl lg:text-3xl">
             TechXchange
           </Title>
-          <Text className="text-gray-600 text-lg">
+          <Text className="text-gray-600 text-base sm:text-lg">
             Welcome back! Sign in to your account
           </Text>
         </div>
@@ -63,6 +63,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
           onFinish={onFinish}
           autoComplete="off"
           size="large"
+          className="space-y-3 sm:space-y-4"
         >
           <Form.Item
             name="email"
@@ -74,7 +75,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
             <Input
               prefix={<MailOutlined className="text-gray-400" />}
               placeholder="Email address"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
             />
           </Form.Item>
 
@@ -88,12 +89,12 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
             <Input.Password
               prefix={<LockOutlined className="text-gray-400" />}
               placeholder="Password"
-              className="h-12 rounded-lg"
+              className="h-10 sm:h-12 rounded-lg"
               iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
 
-          <Form.Item className="mb-6">
+          <Form.Item className="mb-4 sm:mb-6">
             <div className="flex justify-between items-center">
               <label className="flex items-center cursor-pointer">
                 <input type="checkbox" className="mr-2" />
@@ -110,16 +111,16 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
               type="primary"
               htmlType="submit"
               loading={loading}
-              className="w-full h-12 rounded-lg bg-blue-600 hover:bg-blue-700 border-0 text-white font-medium text-lg"
+              className="w-full h-10 sm:h-12 rounded-lg bg-blue-600 hover:bg-blue-700 border-0 text-white font-medium text-base sm:text-lg transition-all duration-200"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </Form.Item>
         </Form>
 
-        <Divider className="text-gray-400">or</Divider>
+        <Divider className="text-gray-400 my-4 sm:my-6">or</Divider>
 
-        <div className="text-center">
+        <div className="text-center mt-4 sm:mt-6">
           <Text className="text-gray-600">
             Don't have an account?{' '}
           </Text>
