@@ -2,32 +2,26 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Divider, Select, Radio } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, ShopOutlined } from '@ant-design/icons';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import authService from '../../services/authService';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState('buyer');
 
   const onFinish = async (values) => {
     setLoading(true);
+    console.log('Form values being sent:', values)
+    console.log("Role Value", values.role)
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName: values.fullName,
-          email: values.email,
-          phoneNumber: values.phoneNumber,
-          password: values.password,
-          role: role,
-        }),
+      const data = await authService.register({
+        fullName: values.fullName,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        password: values.password,
+        role: values.role,
       });
-
-      const data = await response.json();
 
       if (data.success) {
         // Store token in localStorage
@@ -41,7 +35,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      message.error('Network error. Please try again.');
+      message.error(error.message || 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -99,7 +93,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             name="phoneNumber"
             rules={[
               { required: true, message: 'Please input your phone number!' },
-              { pattern: /^[+]?[0-9\s\-()]+$/, message: 'Please enter a valid phone number!' }
+              { pattern: /^[0-9]{10,15}$/, message: 'Please enter a valid phone number (10-15 digits)!' }
             ]}
           >
             <Input
@@ -113,7 +107,11 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             name="password"
             rules={[
               { required: true, message: 'Please input your password!' },
-              { min: 6, message: 'Password must be at least 6 characters!' }
+              { min: 6, message: 'Password must be at least 6 characters!' },
+              { 
+                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number!'
+              }
             ]}
           >
             <Input.Password
@@ -147,12 +145,8 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
             />
           </Form.Item>
 
-          <Form.Item label="I want to:" className="mb-6">
-            <Radio.Group 
-              value={role} 
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full"
-            >
+          <Form.Item name='role' label="I want to:" className="mb-6" rules={[{ required: true, message: 'Please select your role!' }]}>
+            <Radio.Group className="w-full">
               <div className="grid grid-cols-2 gap-4">
                 <Radio.Button 
                   value="buyer" 
@@ -171,7 +165,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
               </div>
             </Radio.Group>
           </Form.Item>
-
+          
           <Form.Item>
             <Button
               type="primary"

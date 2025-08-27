@@ -1,7 +1,7 @@
 // Basic API Configuration
 export const API_CONFIG = {
   // Base URL for all API calls
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
+  BASE_URL: 'http://localhost:3000/api',
   
   DEFAULT_HEADERS: {
     'Content-Type': 'application/json',
