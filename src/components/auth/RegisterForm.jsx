@@ -14,6 +14,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
     setLoading(true);
     console.log('Form values being sent:', values)
     console.log("Role Value", values.role)
+    
     try {
       const data = await authService.register({
         fullName: values.fullName,
@@ -23,6 +24,10 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
         role: values.role,
       });
 
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from server');
+      }  
+
       if (data.success) {
         // Store token in localStorage
         localStorage.setItem('token', data.token);
@@ -31,11 +36,26 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
         message.success(`Registration successful! Welcome to TechXchange, ${data.user.fullName}!`);
         onRegisterSuccess(data.user);
       } else {
-        message.error(data.message || 'Registration failed');
+        const errorMessage = data.message || 'Registration failed. Please check your information.';
+        message.error(errorMessage);
       }
     } catch (error) {
       console.error('Registration error:', error);
-      message.error(error.message || 'Network error. Please try again.');
+      let userMessage = 'An unexpected error occurred. Please try again.';
+    
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        userMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (error.message.includes('timeout')) {
+        userMessage = 'Request timeout. Please try again.';
+      } else if (error.message.includes('Invalid response')) {
+        userMessage = 'Server error. Please try again later.';
+      } else if (error.message.includes('Missing registration')) {
+        userMessage = 'Registration error. Please try again.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      
+      message.error(userMessage);
     } finally {
       setLoading(false);
     }

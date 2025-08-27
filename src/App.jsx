@@ -20,8 +20,8 @@ const AppContent = () => {
   if (!isAuthenticated) {
     return (
       <AuthPage 
-        onLoginSuccess={(userData) => login(userData, userData.token)}
-        onRegisterSuccess={(userData) => register(userData, userData.token)}
+        onLoginSuccess={(userData) => login(userData.user, userData.token)}
+        onRegisterSuccess={(userData) => register(userData.user, userData.token)}
       />
     );
   }

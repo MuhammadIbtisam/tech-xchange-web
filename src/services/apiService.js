@@ -36,6 +36,10 @@ class ApiService {
 
       // Handle HTTP errors
       if (!response.ok) {
+        // For 400 status, return the data so validation errors can be handled properly
+        if (response.status === 400) {
+          return data;
+        }
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 

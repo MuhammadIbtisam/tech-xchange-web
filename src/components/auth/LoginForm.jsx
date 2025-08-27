@@ -19,7 +19,11 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
       });
 
       console.log('API response:', data);
-
+      
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from server');
+      }
+  
       if (data.success) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -27,11 +31,26 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
         message.success('Login successful! Welcome back!');
         onLoginSuccess(data.user);
       } else {
-        message.error(data.message || 'Login failed');
+        const errorMessage = data.message || 'Login failed. Please check your credentials.';
+        message.error(errorMessage);
+        console.warn('Login failed:', data);
       }
     } catch (error) {
       console.error('Login error:', error);
-      message.error(error.message || 'Network error. Please try again.');
+      let userMessage = 'An unexpected error occurred. Please try again.';
+    
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        userMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (error.message.includes('timeout')) {
+        userMessage = 'Request timeout. Please try again.';
+      } else if (error.message.includes('Invalid response')) {
+        userMessage = 'Server error. Please try again later.';
+      } else if (error.message.includes('Missing authentication')) {
+        userMessage = 'Authentication error. Please try again.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      message.error(userMessage);
     } finally {
       setLoading(false);
     }
@@ -82,8 +101,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
           <Form.Item
             name="password"
             rules={[
-              { required: true, message: 'Please input your password!' },
-              { min: 6, message: 'Password must be at least 6 characters!' }
+              { required: true, message: 'Please input your password!' }
             ]}
           >
             <Input.Password
