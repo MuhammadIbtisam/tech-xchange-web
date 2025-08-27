@@ -34,7 +34,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
         localStorage.setItem('user', JSON.stringify(data.user));
         
         message.success(`Registration successful! Welcome to TechXchange, ${data.user.fullName}!`);
-        onRegisterSuccess(data.user);
+        onRegisterSuccess(data);
       } else {
         const errorMessage = data.message || 'Registration failed. Please check your information.';
         message.error(errorMessage);

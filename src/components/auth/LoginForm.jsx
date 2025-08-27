@@ -29,7 +29,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
         localStorage.setItem('user', JSON.stringify(data.user));
         
         message.success('Login successful! Welcome back!');
-        onLoginSuccess(data.user);
+        onLoginSuccess(data);
       } else {
         const errorMessage = data.message || 'Login failed. Please check your credentials.';
         message.error(errorMessage);

@@ -24,3 +24,87 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+/* Ensure header doesn't overlap content */
+.ant-layout-header {
+  position: relative;
+  z-index: 10;
+}
+
+.ant-layout-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Add proper spacing for the main content area */
+.main-content-wrapper {
+  padding-top: 1rem;
+}
+
+/* Custom menu styling for better appearance */
+.ant-menu-inline .ant-menu-item {
+  border-radius: 12px;
+  margin: 4px 8px;
+  transition: all 0.3s ease;
+}
+
+.ant-menu-inline .ant-menu-item:hover {
+  background: linear-gradient(135deg, #3b82f6, #6366f1) !important;
+  color: white !important;
+  transform: translateX(4px);
+}
+
+.ant-menu-inline .ant-menu-item-selected {
+  background: linear-gradient(135deg, #1d4ed8, #4338ca) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.ant-menu-inline .ant-menu-item-selected::after {
+  display: none;
+}
+
+/* Custom dropdown menu styling */
+.ant-dropdown-menu {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.ant-dropdown-menu-item:hover {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+}
+
+/* Custom button styling for better appearance */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  border: none;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+}
+
+.ant-btn-default {
+  border: 1px solid #d9d9d9;
+  background: white;
+  color: #595959;
+}
+
+.ant-btn-default:hover {
+  border-color: #40a9ff;
+  color: #40a9ff;
+}
+
+.ant-btn-dashed {
+  border: 1px dashed #d9d9d9;
+  background: white;
+  color: #595959;
+}
+
+.ant-btn-dashed:hover {
+  border-color: #40a9ff;
+  color: #40a9ff;
+}

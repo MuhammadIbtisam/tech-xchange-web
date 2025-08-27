@@ -20,12 +20,26 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
+    if (storedToken && storedUser && storedToken !== 'undefined' && storedUser !== 'undefined') {
       try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        // Validate that we have valid user data
+        if (parsedUser && typeof parsedUser === 'object' && parsedUser._id && parsedUser.email) {
+          setToken(storedToken);
+          setUser(parsedUser);
+        } else {
+          console.warn('Invalid user data found in localStorage, clearing...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       } catch (error) {
         console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    } else {
+      // Clear any invalid data
+      if (storedToken === 'undefined' || storedUser === 'undefined') {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -34,6 +48,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, userToken) => {
+    // Validate input data before storing
+    if (!userData || !userToken || userToken === 'undefined') {
+      console.error('Invalid login data provided');
+      return;
+    }
+    
     setUser(userData);
     setToken(userToken);
     localStorage.setItem('token', userToken);
@@ -41,6 +61,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = (userData, userToken) => {
+    // Validate input data before storing
+    if (!userData || !userToken || userToken === 'undefined') {
+      console.error('Invalid registration data provided');
+      return;
+    }
+    
     setUser(userData);
     setToken(userToken);
     localStorage.setItem('token', userToken);
