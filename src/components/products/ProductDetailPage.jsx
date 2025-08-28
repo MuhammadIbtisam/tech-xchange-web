@@ -25,7 +25,8 @@ import {
   FireOutlined,
   UserOutlined,
   ShopOutlined,
-  EyeOutlined
+  EyeOutlined,
+  ShoppingOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -33,9 +34,18 @@ import productService from '../../services/productService';
 
 const { Title, Text, Paragraph } = Typography;
 
-const ProductDetailPage = ({ product, onBack, onRefresh }) => {
+const ProductDetailPage = ({ product, onBack, onRefresh, onProductView }) => {
   const { user, isAuthenticated, isSeller, isBuyer, isAdmin } = useAuth();
   const { addToCart, isInCart } = useCart();
+  
+  // Debug: Log props to see what's being passed
+  console.log('🔍 ProductDetailPage props:', { 
+    hasProduct: !!product, 
+    hasOnBack: !!onBack, 
+    hasOnRefresh: !!onRefresh, 
+    hasOnProductView: !!onProductView,
+    onProductViewType: typeof onProductView
+  });
   const [isSaved, setIsSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -491,8 +501,9 @@ const ProductDetailPage = ({ product, onBack, onRefresh }) => {
                     className="h-full cursor-pointer"
                     onClick={() => {
                       // Navigate to this product's detail page
-                      // For now, just show a message
-                      message.info('Click to view product details');
+                      if (onProductView && typeof onProductView === 'function') {
+                        onProductView(relatedProduct);
+                      }
                     }}
                   >
                     <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden mb-3">
@@ -518,17 +529,57 @@ const ProductDetailPage = ({ product, onBack, onRefresh }) => {
                       {formatPrice(relatedProduct.price)}
                     </div>
                     
+                    {/* Additional product info */}
+                    <div className="text-xs text-gray-500 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span>Stock: {relatedProduct.stock}</span>
+                        <span>•</span>
+                        <span className="capitalize">{relatedProduct.condition}</span>
+                      </div>
+                    </div>
+                    
                     <div className="flex items-center justify-between">
                       <Tag color="blue">
                         {relatedProduct.productTypeId?.brandId?.name}
                       </Tag>
-                      <Button 
-                        type="primary" 
-                        size="small" 
-                        icon={<EyeOutlined />}
-                      >
-                        {/* View */}
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button 
+                          type="primary" 
+                          size="small" 
+                          icon={<EyeOutlined />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onProductView && typeof onProductView === 'function') {
+                              onProductView(relatedProduct);
+                            }
+                          }}
+                        >
+                          {/* View */}
+                        </Button>
+                        {relatedProduct.stock > 0 && (
+                          <Button 
+                            type="default" 
+                            size="small" 
+                            icon={<ShoppingCartOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Add to cart functionality for related products
+                              if (isAuthenticated) {
+                                const result = addToCart(relatedProduct, 1);
+                                if (result.success) {
+                                  message.success('Added to cart!');
+                                } else {
+                                  message.error('Failed to add to cart');
+                                }
+                              } else {
+                                message.warning('Please login to add items to cart');
+                              }
+                            }}
+                          >
+                            {/* Add */}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 </Col>
@@ -537,6 +588,25 @@ const ProductDetailPage = ({ product, onBack, onRefresh }) => {
           ) : (
             <Empty description="No related products found" />
           )}
+        </div>
+        
+        {/* Continue Shopping Section */}
+        <div className="mt-12 text-center">
+          <Divider />
+          <Space direction="vertical" size="large">
+            <Title level={4}>Continue Shopping</Title>
+            <Text className="text-gray-600">
+              Found what you're looking for? Explore more products in our catalog.
+            </Text>
+            <Button 
+              type="primary" 
+              size="large" 
+              icon={<ShoppingOutlined />}
+              onClick={onBack}
+            >
+              Back to Products
+            </Button>
+          </Space>
         </div>
       </div>
     </div>

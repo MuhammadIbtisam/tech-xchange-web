@@ -75,6 +75,7 @@ const AppContent = () => {
             // Refresh products if needed
             setSelectedProduct(null);
           }}
+          onProductView={setSelectedProduct}
         />
       );
     }
