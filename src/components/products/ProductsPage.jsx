@@ -40,7 +40,7 @@ const { Search } = Input;
 const { Option } = Select;
 const { Title, Text, Paragraph } = Typography;
 
-const ProductsPage = () => {
+const ProductsPage = ({ onProductView }) => {
   const { user, isAuthenticated, isSeller, isBuyer, isAdmin } = useAuth();
   
   // State for products and data
@@ -724,6 +724,7 @@ const ProductsPage = () => {
                       onEdit={handleProductEdit}
                       onDelete={handleProductDelete}
                       onRefresh={loadProducts}
+                      onProductView={onProductView}
                       viewMode="grid"
                     />
                   </div>
@@ -738,6 +739,7 @@ const ProductsPage = () => {
                       onEdit={handleProductEdit}
                       onDelete={handleProductDelete}
                       onRefresh={loadProducts}
+                      onProductView={onProductView}
                       viewMode="list"
                     />
                   </div>

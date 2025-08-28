@@ -17,6 +17,7 @@ class ProductService {
     if (params.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params.order) queryParams.append('order', params.order);
     if (params.condition) queryParams.append('condition', params.condition);
+    if (params.exclude) queryParams.append('exclude', params.exclude);
 
     const endpoint = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return await apiService.get(endpoint);
@@ -103,7 +104,15 @@ class ProductService {
 
   // User: Add product to saved items
   async addToSavedItems(productId, token) {
-    return await apiService.post(`/saved-items/user/product/${productId}`, {}, token);
+    console.log('🔍 Adding to saved items:', { productId, token: token ? 'Present' : 'Missing' });
+    try {
+      const response = await apiService.post(`/saved-items/user/product/${productId}`, {}, token);
+      console.log('✅ Save response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Save error:', error);
+      throw error;
+    }
   }
 
   // User: Remove product from saved items

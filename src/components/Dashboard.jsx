@@ -120,7 +120,7 @@ const Dashboard = () => {
                 title={stat.title}
                 value={stat.value}
                 prefix={stat.prefix}
-                valueStyle={{ color: stat.color }}
+                styles={{ content: { color: stat.color } }}
               />
               <div className="flex items-center mt-2">
                 <Text type="success" className="text-sm">
@@ -137,7 +137,7 @@ const Dashboard = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card title={isSeller ? "Store Goals" : "Monthly Goals"} className="h-full">
-            <Space direction="vertical" className="w-full">
+            <Space orientation="vertical" className="w-full">
               {isSeller ? (
                 <>
                   <div>
@@ -193,7 +193,7 @@ const Dashboard = () => {
         
         <Col xs={24} lg={12}>
           <Card title="Recent Activity" className="h-full">
-            <Space direction="vertical" className="w-full">
+            <Space orientation="vertical" className="w-full">
               {recentActivities.map((activity, index) => (
                 <div key={index} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
                   <Avatar size="small" className="bg-blue-500">

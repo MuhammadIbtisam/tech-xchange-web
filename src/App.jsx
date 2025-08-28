@@ -1,12 +1,15 @@
 import React from 'react';
 import { Layout, Menu, Button, Typography, Space, Avatar, Dropdown } from 'antd';
-import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
+import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined, MenuOutlined, CloseOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider, useCart } from './context/CartContext';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import ProductsPage from './components/products/ProductsPage';
+import CartPage from './components/cart/CartPage';
+import ProductDetailPage from './components/products/ProductDetailPage';
 
 const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -14,9 +17,12 @@ const { Title, Text } = Typography;
 // Main App Content Component
 const AppContent = () => {
   const { user, isAuthenticated, isSeller, isBuyer, logout, login, register } = useAuth();
+  const { cartItemCount } = useCart();
   const [selectedKey, setSelectedKey] = React.useState('1');
   const [collapsed, setCollapsed] = React.useState(false);
   const [sidebarVisible, setSidebarVisible] = React.useState(false);
+  const [showCart, setShowCart] = React.useState(false);
+  const [selectedProduct, setSelectedProduct] = React.useState(null);
 
   // If not authenticated, show auth page
   if (!isAuthenticated) {
@@ -56,11 +62,28 @@ const AppContent = () => {
   }
 
   const renderContent = () => {
+    if (showCart) {
+      return <CartPage onBack={() => setShowCart(false)} />;
+    }
+    
+    if (selectedProduct) {
+      return (
+        <ProductDetailPage 
+          product={selectedProduct} 
+          onBack={() => setSelectedProduct(null)}
+          onRefresh={() => {
+            // Refresh products if needed
+            setSelectedProduct(null);
+          }}
+        />
+      );
+    }
+    
     switch (selectedKey) {
       case '1':
         return <Dashboard />;
       case '2':
-        return <ProductsPage />;
+        return <ProductsPage onProductView={setSelectedProduct} />;
       case '3':
         return <Settings />;
       case '4':
@@ -185,6 +208,21 @@ const AppContent = () => {
           
           {/* User Profile Section */}
           <div className="flex items-center gap-4 relative z-10">
+            {/* Cart Icon */}
+            <Button
+              type="text"
+              icon={<ShoppingCartOutlined />}
+              onClick={() => setShowCart(true)}
+              className="text-white hover:text-blue-200 hover:bg-white/10 relative"
+              size="large"
+            >
+              {cartItemCount > 0 && (
+                <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </div>
+              )}
+            </Button>
+            
             <div className="text-right">
               <Text strong className="block text-white text-base leading-tight font-semibold">
                 {user?.fullName}
@@ -228,7 +266,9 @@ const AppContent = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </AuthProvider>
   );
 }
