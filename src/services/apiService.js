@@ -40,6 +40,26 @@ class ApiService {
         if (response.status === 400) {
           return data;
         }
+        
+        // For 500 errors, try to get more details
+        if (response.status === 500) {
+          console.error('🔍 Backend 500 error details:', data);
+          console.error('🔍 Error data type:', typeof data);
+          console.error('🔍 Error data keys:', Object.keys(data || {}));
+          console.error('🔍 Full error response:', JSON.stringify(data, null, 2));
+          
+          // Try to extract more specific error information
+          let errorMessage = 'Internal server error';
+          if (data && typeof data === 'object') {
+            if (data.message) errorMessage = data.message;
+            else if (data.error) errorMessage = data.error;
+            else if (data.errors) errorMessage = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+            else errorMessage = JSON.stringify(data);
+          }
+          
+          throw new Error(`Server error: ${errorMessage}`);
+        }
+        
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 

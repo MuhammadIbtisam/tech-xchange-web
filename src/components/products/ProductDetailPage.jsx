@@ -556,14 +556,14 @@ const ProductDetailPage = ({ product, onBack, onRefresh, onProductView }) => {
                         >
                           {/* View */}
                         </Button>
-                        {relatedProduct.stock > 0 && (
+                        {relatedProduct.stock > 0 && isBuyer && (
                           <Button 
                             type="default" 
                             size="small" 
                             icon={<ShoppingCartOutlined />}
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Add to cart functionality for related products
+                              // Add to cart functionality for related products - only for buyers
                               if (isAuthenticated) {
                                 const result = addToCart(relatedProduct, 1);
                                 if (result.success) {

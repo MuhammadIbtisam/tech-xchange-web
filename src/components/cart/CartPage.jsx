@@ -26,13 +26,35 @@ import {
 } from '@ant-design/icons';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useOrder } from '../../context/OrderContext';
+import orderService from '../../services/orderService';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const CartPage = ({ onBack }) => {
-  const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart, checkout } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { isAuthenticated, user, isBuyer } = useAuth();
+  const { addOrder } = useOrder();
+  
+  // Restrict cart access to buyers only
+  if (!isAuthenticated || !isBuyer) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center">
+            <Title level={2} className="mb-4">Access Denied</Title>
+            <Text className="text-gray-600 mb-6 block">
+              Shopping cart is only available for buyer accounts.
+            </Text>
+            <Button type="primary" onClick={onBack}>
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const [loading, setLoading] = useState(false);
   const [checkoutModalVisible, setCheckoutModalVisible] = useState(false);
   const [checkoutForm] = Form.useForm();
@@ -74,6 +96,15 @@ const CartPage = ({ onBack }) => {
       return;
     }
 
+    // Validate all required fields
+    const requiredFields = ['street', 'city', 'state', 'zipCode', 'country', 'phone'];
+    const missingFields = requiredFields.filter(field => !values[field] || !values[field].trim());
+    
+    if (missingFields.length > 0) {
+      message.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -82,29 +113,146 @@ const CartPage = ({ onBack }) => {
         return;
       }
 
-      const orderData = {
-        shippingAddress: {
-          street: values.street,
-          city: values.city,
-          state: values.state,
-          zipCode: values.zipCode,
-          country: values.country
-        },
-        paymentMethod: values.paymentMethod
-      };
-
-      const result = await checkout(orderData, token);
-      if (result.success) {
-        message.success('Order placed successfully!');
-        setCheckoutModalVisible(false);
-        checkoutForm.resetFields();
-        onBack && onBack();
-      } else {
-        message.error(result.error || 'Checkout failed');
+      // Validate user object first
+      if (!user || !user._id) {
+        throw new Error('User information not available. Please login again.');
       }
+      
+      console.log(`🔍 User validation:`, { user: user, userId: user._id, userType: typeof user._id });
+      
+      // Create individual orders for each cart item
+      const orders = [];
+      
+      for (const item of cartItems) {
+        // Prepare order data for single product - ensure exact backend format
+        const orderData = {
+          buyerId: user._id, // Add buyerId as required by backend
+          quantity: Number(item.quantity), // Ensure it's a number
+          shippingAddress: {
+            street: values.street.trim(),
+            city: values.city.trim(),
+            state: values.state.trim(),
+            zipCode: values.zipCode.trim(),
+            country: values.country.trim(),
+            phone: values.phone.trim()
+          },
+          paymentMethod: values.paymentMethod
+        };
+        
+        // Add optional fields only if they exist and are valid
+        if (values.notes && values.notes.trim()) {
+          orderData.notes = values.notes.trim();
+        }
+        
+        // Validate required fields
+        if (!orderData.quantity || orderData.quantity < 1) {
+          throw new Error(`Invalid quantity for ${item.name}: ${item.quantity}`);
+        }
+        
+        if (!orderData.shippingAddress.street || !orderData.shippingAddress.city || 
+            !orderData.shippingAddress.state || !orderData.shippingAddress.zipCode || 
+            !orderData.shippingAddress.country || !orderData.shippingAddress.phone) {
+          throw new Error('All shipping address fields are required');
+        }
+        
+                // Log the validated data structure
+        console.log(`🧪 Validated order data for ${item.name}:`, orderData);
+        console.log(`📋 Full order data JSON:`, JSON.stringify(orderData, null, 2));
+        console.log(`🔍 Shipping address details:`, orderData.shippingAddress);
+        console.log(`👤 User object:`, user);
+        console.log(`🆔 User ID being sent:`, user._id);
+        console.log(`🔑 buyerId in orderData:`, orderData.buyerId);
+        
+        console.log(`📦 Creating order for product ${item.productId}:`, orderData);
+        console.log(`🔍 Product details:`, {
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        });
+        console.log(`📤 Final order data being sent:`, JSON.stringify(orderData, null, 2));
+
+        try {
+          // Create order for this product
+          console.log(`🚀 Sending order request for ${item.name}...`);
+          console.log(`📤 Request details:`, {
+            productId: item.productId,
+            orderData: orderData,
+            token: token ? 'Present' : 'Missing',
+            buyerId: orderData.buyerId
+          });
+          
+          const newOrder = await orderService.createOrder(item.productId, orderData, token);
+          
+          // Validate the order response
+          if (!newOrder || (!newOrder.data && !newOrder.order && !newOrder._id)) {
+            console.warn('⚠️ Order response missing ID, using fallback ID');
+          }
+          
+          orders.push(newOrder);
+          
+          // Add order to local context for immediate display
+          console.log('🔍 Full API response structure:', newOrder);
+          
+          const orderForContext = {
+            _id: newOrder.data?._id || newOrder.order?._id || newOrder._id || `order_${Date.now()}_${Math.random()}`,
+            productId: item.productId,
+            productName: item.name,
+            quantity: item.quantity,
+            totalAmount: item.price * item.quantity,
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentMethod: values.paymentMethod,
+            shippingAddress: orderData.shippingAddress,
+            buyerId: user._id,
+            sellerId: item.sellerId || 'unknown',
+            createdAt: new Date(),
+            estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+          };
+          
+          console.log('📦 Order for context:', orderForContext);
+          
+          try {
+            addOrder(orderForContext);
+            console.log(`✅ Order created for ${item.name}:`, newOrder);
+            console.log(`📦 Order added to context:`, orderForContext);
+          } catch (contextError) {
+            console.warn('⚠️ Failed to add order to context:', contextError);
+            // Don't fail the checkout if context fails
+          }
+        } catch (error) {
+          console.error(`❌ Failed to create order for ${item.name}:`, error);
+          
+          // Provide more specific error information
+          let errorMessage = error.message;
+          if (error.message.includes('400')) {
+            errorMessage = 'Invalid order data. Please check your information.';
+          } else if (error.message.includes('401')) {
+            errorMessage = 'Authentication failed. Please login again.';
+          } else if (error.message.includes('403')) {
+            errorMessage = 'You cannot order this product.';
+          } else if (error.message.includes('404')) {
+            errorMessage = 'Product not found.';
+          } else if (error.message.includes('500')) {
+            errorMessage = 'Server error. Please try again later.';
+          }
+          
+          throw new Error(`Failed to create order for ${item.name}: ${errorMessage}`);
+        }
+      }
+      
+      message.success('Order placed successfully!');
+      setCheckoutModalVisible(false);
+      checkoutForm.resetFields();
+      
+      // Clear cart after successful order
+      clearCart();
+      
+      // Navigate back
+      onBack && onBack();
     } catch (error) {
       console.error('Checkout error:', error);
-      message.error('Checkout failed. Please try again.');
+      message.error(`Checkout failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -325,6 +473,17 @@ const CartPage = ({ onBack }) => {
               </Col>
             </Row>
             <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="phone"
+                  label="Phone Number"
+                  rules={[{ required: true, message: 'Please enter your phone number' }]}
+                >
+                  <Input placeholder="+447911123456" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
                   name="city"
@@ -378,9 +537,9 @@ const CartPage = ({ onBack }) => {
             >
               <Select>
                 <Option value="credit_card">Credit Card</Option>
-                <Option value="debit_card">Debit Card</Option>
                 <Option value="paypal">PayPal</Option>
                 <Option value="bank_transfer">Bank Transfer</Option>
+                <Option value="cash_on_delivery">Cash on Delivery</Option>
               </Select>
             </Form.Item>
 

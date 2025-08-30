@@ -4,12 +4,16 @@ import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOu
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
+import { OrderProvider, useOrder } from './context/OrderContext';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import ProductsPage from './components/products/ProductsPage';
 import CartPage from './components/cart/CartPage';
 import ProductDetailPage from './components/products/ProductDetailPage';
+import SellerProductsPage from './components/seller/SellerProductsPage';
+import BuyerOrdersPage from './components/orders/BuyerOrdersPage';
+import SellerOrdersPage from './components/orders/SellerOrdersPage';
 
 const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -17,7 +21,20 @@ const { Title, Text } = Typography;
 // Main App Content Component
 const AppContent = () => {
   const { user, isAuthenticated, isSeller, isBuyer, logout, login, register } = useAuth();
-  const { cartItemCount } = useCart();
+  
+  // Safely use cart context with error boundary
+  let cartItemCount = 0;
+  let buyerCartItemCount = 0;
+  
+  try {
+    const cartContext = useCart();
+    cartItemCount = cartContext?.cartItemCount || 0;
+    buyerCartItemCount = isBuyer ? cartItemCount : 0;
+  } catch (error) {
+    console.warn('Cart context not available:', error.message);
+    cartItemCount = 0;
+    buyerCartItemCount = 0;
+  }
   const [selectedKey, setSelectedKey] = React.useState('1');
   const [collapsed, setCollapsed] = React.useState(false);
   const [sidebarVisible, setSidebarVisible] = React.useState(false);
@@ -59,6 +76,20 @@ const AppContent = () => {
       icon: <ShopOutlined />,
       label: 'My Products',
     });
+    menuItems.push({
+      key: '5',
+      icon: <ShoppingOutlined />,
+      label: 'Incoming Orders',
+    });
+  }
+
+  // Add buyer-specific menu items
+  if (isBuyer) {
+    menuItems.push({
+      key: '6',
+      icon: <ShoppingOutlined />,
+      label: 'My Orders',
+    });
   }
 
   const renderContent = () => {
@@ -88,7 +119,11 @@ const AppContent = () => {
       case '3':
         return <Settings />;
       case '4':
-        return <div className="p-6">My Products page coming soon...</div>;
+        return <SellerProductsPage onProductView={setSelectedProduct} />;
+      case '5':
+        return <SellerOrdersPage />;
+      case '6':
+        return <BuyerOrdersPage />;
       default:
         return <Dashboard />;
     }
@@ -209,20 +244,22 @@ const AppContent = () => {
           
           {/* User Profile Section */}
           <div className="flex items-center gap-4 relative z-10">
-            {/* Cart Icon */}
-            <Button
-              type="text"
-              icon={<ShoppingCartOutlined />}
-              onClick={() => setShowCart(true)}
-              className="text-white hover:text-blue-200 hover:bg-white/10 relative"
-              size="large"
-            >
-              {cartItemCount > 0 && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {cartItemCount > 99 ? '99+' : cartItemCount}
-                </div>
-              )}
-            </Button>
+                    {/* Cart Icon - Only for Buyers */}
+        {isBuyer && (
+          <Button
+            type="text"
+            icon={<ShoppingCartOutlined />}
+            onClick={() => setShowCart(true)}
+            className="text-white hover:text-blue-200 hover:bg-white/10 relative"
+            size="large"
+          >
+                      {buyerCartItemCount > 0 && (
+            <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+              {buyerCartItemCount > 99 ? '99+' : buyerCartItemCount}
+            </div>
+          )}
+          </Button>
+        )}
             
             <div className="text-right">
               <Text strong className="block text-white text-base leading-tight font-semibold">
@@ -268,7 +305,9 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AppContent />
+        <OrderProvider>
+          <AppContent />
+        </OrderProvider>
       </CartProvider>
     </AuthProvider>
   );
