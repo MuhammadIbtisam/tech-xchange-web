@@ -40,7 +40,7 @@ const { Title, Text } = Typography;
 
 const ORDER_STATUS = {
   pending: { label: 'Pending', color: 'orange', icon: <ClockCircleOutlined /> },
-  processing: { label: 'Processing', color: 'blue', icon: <ShoppingOutlined /> },
+  confirmed: { label: 'Confirmed', color: 'blue', icon: <CheckCircleOutlined /> },
   shipped: { label: 'Shipped', color: 'cyan', icon: <TruckOutlined /> },
   delivered: { label: 'Delivered', color: 'green', icon: <CheckCircleOutlined /> },
   cancelled: { label: 'Cancelled', color: 'red', icon: <CloseCircleOutlined /> }
@@ -191,12 +191,12 @@ const BuyerOrdersPage = () => {
     
     const total = ordersArray.length;
     const pending = ordersArray.filter(o => o.status === 'pending').length;
-    const processing = ordersArray.filter(o => o.status === 'processing').length;
+    const confirmed = ordersArray.filter(o => o.status === 'confirmed').length;
     const shipped = ordersArray.filter(o => o.status === 'shipped').length;
     const delivered = ordersArray.filter(o => o.status === 'delivered').length;
     const cancelled = ordersArray.filter(o => o.status === 'cancelled').length;
 
-    return { total, pending, processing, shipped, delivered, cancelled };
+    return { total, pending, confirmed, shipped, delivered, cancelled };
   };
 
   // Debug: Log orders state
@@ -423,9 +423,9 @@ const BuyerOrdersPage = () => {
           <Col xs={24} sm={12} md={4}>
             <Card>
               <Statistic
-                title="Processing"
-                value={stats.processing}
-                prefix={<ShoppingOutlined />}
+                title="Confirmed"
+                value={stats.confirmed}
+                prefix={<CheckCircleOutlined />}
                 styles={{ content: { color: '#1890ff' } }}
               />
             </Card>
@@ -475,7 +475,7 @@ const BuyerOrdersPage = () => {
                   options={[
                     { label: 'All Orders', value: 'all' },
                     { label: 'Pending', value: 'pending' },
-                    { label: 'Processing', value: 'processing' },
+                    { label: 'Confirmed', value: 'confirmed' },
                     { label: 'Shipped', value: 'shipped' },
                     { label: 'Delivered', value: 'delivered' },
                     { label: 'Cancelled', value: 'cancelled' }
@@ -622,7 +622,7 @@ const BuyerOrdersPage = () => {
                   <Progress
                     percent={
                       selectedOrder.status === 'pending' ? 25 :
-                      selectedOrder.status === 'processing' ? 50 :
+                      selectedOrder.status === 'confirmed' ? 50 :
                       selectedOrder.status === 'shipped' ? 75 :
                       selectedOrder.status === 'delivered' ? 100 :
                       selectedOrder.status === 'cancelled' ? 0 : 0

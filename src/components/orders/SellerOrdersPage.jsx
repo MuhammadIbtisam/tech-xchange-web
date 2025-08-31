@@ -48,7 +48,7 @@ const { Option } = Select;
 
 const ORDER_STATUS = {
   pending: { label: 'Pending', color: 'orange', icon: <ClockCircleOutlined /> },
-  processing: { label: 'Processing', color: 'blue', icon: <ShoppingOutlined /> },
+  confirmed: { label: 'Confirmed', color: 'blue', icon: <CheckCircleOutlined /> },
   shipped: { label: 'Shipped', color: 'cyan', icon: <TruckOutlined /> },
   delivered: { label: 'Delivered', color: 'green', icon: <CheckCircleOutlined /> },
   cancelled: { label: 'Cancelled', color: 'red', icon: <CloseCircleOutlined /> }
@@ -172,16 +172,23 @@ const SellerOrdersPage = () => {
 
   const handleStatusSubmit = async (values) => {
     try {
+      console.log('🚀 Starting status update for order:', selectedOrder._id);
+      console.log('📝 New status:', values.status);
+      console.log('🔑 Token present:', !!token);
+      
       // Try to update via backend API first
-      await orderService.updateOrderStatus(selectedOrder._id, values.status, token);
+      await orderService.updateOrderStatus(selectedOrder._id, values.status, token, 'seller');
+      console.log('✅ Backend update successful');
       message.success('Order status updated successfully via backend');
       setStatusUpdateModal(false);
       statusForm.resetFields();
       loadOrders(); // Reload orders
     } catch (error) {
-      console.error('Backend API failed for status update:', error);
+      console.error('❌ Backend API failed for status update:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error type:', typeof error);
       
-      // Fallback: Update order status locally
+      // Handle different types of errors
       if (error.message.includes('404')) {
         console.log('🔄 Backend status update endpoint not available, updating locally...');
         
@@ -196,8 +203,12 @@ const SellerOrdersPage = () => {
         message.success(`Order status updated to "${values.status}" (local update - backend endpoint not available)`);
         setStatusUpdateModal(false);
         statusForm.resetFields();
+      } else if (error.message.includes('Cannot change status')) {
+        // Handle business logic validation errors
+        message.error(`Status update failed: ${error.message}`);
+        console.log('🚫 Business logic validation failed:', error.message);
       } else {
-        message.error('Failed to update order status');
+        message.error(`Failed to update order status: ${error.message}`);
       }
     }
   };
@@ -227,7 +238,7 @@ const SellerOrdersPage = () => {
     
     const total = ordersArray.length;
     const pending = ordersArray.filter(o => o.status === 'pending').length;
-    const processing = ordersArray.filter(o => o.status === 'processing').length;
+    const confirmed = ordersArray.filter(o => o.status === 'confirmed').length;
     const shipped = ordersArray.filter(o => o.status === 'shipped').length;
     const delivered = ordersArray.filter(o => o.status === 'delivered').length;
     const cancelled = ordersArray.filter(o => o.status === 'cancelled').length;
@@ -235,7 +246,7 @@ const SellerOrdersPage = () => {
       .filter(o => o.status === 'delivered')
       .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
-    return { total, pending, processing, shipped, delivered, cancelled, totalRevenue };
+    return { total, pending, confirmed, shipped, delivered, cancelled, totalRevenue };
   };
 
   // Debug: Log orders state
@@ -471,9 +482,9 @@ const SellerOrdersPage = () => {
           <Col xs={24} sm={12} md={4}>
             <Card>
               <Statistic
-                title="Processing"
-                value={stats.processing}
-                prefix={<ShoppingOutlined />}
+                title="Confirmed"
+                value={stats.confirmed}
+                prefix={<CheckCircleOutlined />}
                 styles={{ content: { color: '#1890ff' } }}
               />
             </Card>
@@ -524,7 +535,7 @@ const SellerOrdersPage = () => {
                   options={[
                     { label: 'All Orders', value: 'all' },
                     { label: 'Pending', value: 'pending' },
-                    { label: 'Processing', value: 'processing' },
+                    { label: 'Confirmed', value: 'confirmed' },
                     { label: 'Shipped', value: 'shipped' },
                     { label: 'Delivered', value: 'delivered' },
                     { label: 'Cancelled', value: 'cancelled' }
@@ -696,7 +707,7 @@ const SellerOrdersPage = () => {
                   <Progress
                     percent={
                       selectedOrder.status === 'pending' ? 25 :
-                      selectedOrder.status === 'processing' ? 50 :
+                      selectedOrder.status === 'confirmed' ? 50 :
                       selectedOrder.status === 'shipped' ? 75 :
                       selectedOrder.status === 'delivered' ? 100 :
                       selectedOrder.status === 'cancelled' ? 0 : 0
@@ -736,7 +747,7 @@ const SellerOrdersPage = () => {
             >
               <Select placeholder="Select status">
                 <Option value="pending">Pending</Option>
-                <Option value="processing">Processing</Option>
+                <Option value="confirmed">Confirmed</Option>
                 <Option value="shipped">Shipped</Option>
                 <Option value="delivered">Delivered</Option>
                 <Option value="cancelled">Cancelled</Option>

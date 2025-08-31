@@ -1,117 +1,216 @@
 import React from 'react';
-import { Card, Row, Col, Statistic, Progress, Typography, Space, Avatar, Button } from 'antd';
-import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Statistic, Progress, Typography, Space, Avatar, Button, Table, Tag, Badge } from 'antd';
+import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined, TeamOutlined, CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
 const { Title, Text } = Typography;
 
 const Dashboard = () => {
-  const { user, isSeller, isBuyer } = useAuth();
+  const { user, isSeller, isBuyer, isAdmin } = useAuth();
 
-  const buyerStats = [
-    {
-      title: 'Total Orders',
-      value: 12,
-      prefix: <ShoppingCartOutlined />,
-      color: '#1890ff',
-      increase: '+3',
-    },
-    {
-      title: 'Saved Items',
-      value: 8,
-      prefix: <EyeOutlined />,
-      color: '#52c41a',
-      increase: '+2',
-    },
-    {
-      title: 'Total Spent',
-      value: '$2,450',
-      prefix: <DollarOutlined />,
-      color: '#faad14',
-      increase: '+$450',
-    },
-    {
-      title: 'Reviews Given',
-      value: 5,
-      prefix: <UserOutlined />,
-      color: '#f5222d',
-      increase: '+1',
-    },
-  ];
+  // Role-specific statistics - only relevant data
+  const getRoleStats = () => {
+    if (isSeller) {
+      return [
+        {
+          title: 'Active Products',
+          value: 8,
+          prefix: <ShopOutlined />,
+          color: '#1890ff',
+          relevant: true
+        },
+        {
+          title: 'Pending Orders',
+          value: 3,
+          prefix: <ClockCircleOutlined />,
+          color: '#fa8c16',
+          relevant: true
+        },
+        {
+          title: 'Monthly Revenue',
+          value: '£2,847',
+          prefix: <DollarOutlined />,
+          color: '#52c41a',
+          relevant: true
+        },
+        {
+          title: 'Product Views',
+          value: 156,
+          prefix: <EyeOutlined />,
+          color: '#faad14',
+          relevant: true
+        }
+      ];
+    } else if (isBuyer) {
+      return [
+        {
+          title: 'Active Orders',
+          value: 3,
+          prefix: <ShoppingCartOutlined />,
+          color: '#1890ff',
+          relevant: true
+        },
+        {
+          title: 'Total Spent',
+          value: '£1,247',
+          prefix: <DollarOutlined />,
+          color: '#52c41a',
+          relevant: true
+        },
+        {
+          title: 'Saved Items',
+          value: 5,
+          prefix: <EyeOutlined />,
+          color: '#eb2f96',
+          relevant: true
+        },
+        {
+          title: 'Reviews Given',
+          value: 2,
+          prefix: <UserOutlined />,
+          color: '#faad14',
+          relevant: true
+        }
+      ];
+    } else if (isAdmin) {
+      return [
+        {
+          title: 'Total Users',
+          value: 247,
+          prefix: <TeamOutlined />,
+          color: '#1890ff',
+          relevant: true
+        },
+        {
+          title: 'Pending Approvals',
+          value: 8,
+          prefix: <ClockCircleOutlined />,
+          color: '#fa8c16',
+          relevant: true
+        },
+        {
+          title: 'Platform Revenue',
+          value: '£12,450',
+          prefix: <DollarOutlined />,
+          color: '#52c41a',
+          relevant: true
+        },
+        {
+          title: 'Active Products',
+          value: 142,
+          prefix: <ShopOutlined />,
+          color: '#faad14',
+          relevant: true
+        }
+      ];
+    }
+    return [];
+  };
 
-  const sellerStats = [
-    {
-      title: 'Total Products',
-      value: 24,
-      prefix: <ShopOutlined />,
-      color: '#1890ff',
-      increase: '+3',
-    },
-    {
-      title: 'Total Sales',
-      value: '$8,450',
-      prefix: <DollarOutlined />,
-      color: '#52c41a',
-      increase: '+$1,200',
-    },
-    {
-      title: 'Product Views',
-      value: 1234,
-      prefix: <EyeOutlined />,
-      color: '#faad14',
-      increase: '+156',
-    },
-    {
-      title: 'Average Rating',
-      value: 4.8,
-      prefix: <RiseOutlined />,
-      color: '#f5222d',
-      increase: '+0.2',
-    },
-  ];
+  // Role-specific recent data - only relevant information
+  const getRecentData = () => {
+    if (isSeller) {
+      return [
+        { type: 'Order', detail: 'New order for Lenovo ThinkPad', time: '2 min ago', status: 'pending' },
+        { type: 'Product', detail: 'MacBook Air approved', time: '5 min ago', status: 'approved' },
+        { type: 'View', detail: 'High traffic on Dell XPS', time: '10 min ago', status: 'info' }
+      ];
+    } else if (isBuyer) {
+      return [
+        { type: 'Order', detail: 'Lenovo ThinkPad shipped', time: '2 min ago', status: 'shipped' },
+        { type: 'Payment', detail: 'Payment completed', time: '5 min ago', status: 'completed' },
+        { type: 'Delivery', detail: 'Sony headphones delivered', time: '10 min ago', status: 'delivered' }
+      ];
+    } else if (isAdmin) {
+      return [
+        { type: 'User', detail: 'New seller registered', time: '2 min ago', status: 'pending' },
+        { type: 'Product', detail: 'Gaming laptop approved', time: '5 min ago', status: 'approved' },
+        { type: 'System', detail: 'Database backup completed', time: '10 min ago', status: 'completed' }
+      ];
+    }
+    return [];
+  };
 
-  const stats = isSeller ? sellerStats : buyerStats;
+  // Role-specific quick actions - only relevant functions
+  const getQuickActions = () => {
+    if (isSeller) {
+      return [
+        { icon: <ShopOutlined />, label: 'Add Product', action: () => console.log('Navigate to Add Product') },
+        { icon: <ShoppingCartOutlined />, label: 'View Orders', action: () => console.log('Navigate to View Orders') },
+        { icon: <EyeOutlined />, label: 'Analytics', action: () => console.log('Navigate to Analytics') }
+      ];
+    } else if (isBuyer) {
+      return [
+        { icon: <ShoppingCartOutlined />, label: 'Browse Products', action: () => console.log('Navigate to Browse Products') },
+        { icon: <EyeOutlined />, label: 'My Orders', action: () => console.log('Navigate to My Orders') },
+        { icon: <UserOutlined />, label: 'Profile', action: () => console.log('Navigate to Profile') }
+      ];
+    } else if (isAdmin) {
+      return [
+        { icon: <CheckOutlined />, label: 'Review Products', action: () => console.log('Navigate to Review Products') },
+        { icon: <TeamOutlined />, label: 'Manage Users', action: () => console.log('Navigate to Manage Users') },
+        { icon: <EyeOutlined />, label: 'System Status', action: () => console.log('Navigate to System Status') }
+      ];
+    }
+    return [];
+  };
 
-  const recentActivities = isSeller ? [
-    { user: 'New order received', action: 'for MacBook Pro', time: '2 minutes ago', avatar: '🖥️' },
-    { user: 'Product approved', action: 'iPhone 16 by admin', time: '5 minutes ago', avatar: '✅' },
-    { user: 'New views', action: 'on ThinkPad X1', time: '10 minutes ago', avatar: '👁️' },
-    { user: 'Review received', action: '5 stars for MacBook', time: '15 minutes ago', avatar: '⭐' },
-  ] : [
-    { user: 'John Doe', action: 'placed an order', time: '2 minutes ago', avatar: 'JD' },
-    { user: 'Jane Smith', action: 'updated profile', time: '5 minutes ago', avatar: 'JS' },
-    { user: 'Mike Johnson', action: 'completed payment', time: '10 minutes ago', avatar: 'MJ' },
-    { user: 'Sarah Wilson', action: 'left a review', time: '15 minutes ago', avatar: 'SW' },
-  ];
+  // Role-specific progress data - only relevant metrics
+  const getProgressData = () => {
+    if (isSeller) {
+      return [
+        { label: 'Sales Target', percent: 75, color: '#52c41a' },
+        { label: 'Product Growth', percent: 60, color: '#1890ff' },
+        { label: 'Customer Satisfaction', percent: 90, color: '#faad14' }
+      ];
+    } else if (isBuyer) {
+      return [
+        { label: 'Monthly Budget', percent: 65, color: '#52c41a' },
+        { label: 'Order Goal', percent: 80, color: '#1890ff' },
+        { label: 'Review Goal', percent: 90, color: '#faad14' }
+      ];
+    } else if (isAdmin) {
+      return [
+        { label: 'Platform Growth', percent: 85, color: '#52c41a' },
+        { label: 'User Engagement', percent: 72, color: '#1890ff' },
+        { label: 'System Performance', percent: 95, color: '#faad14' }
+      ];
+    }
+    return [];
+  };
 
-  const quickActions = isSeller ? [
-    { icon: <ShopOutlined />, label: 'Add Product', color: 'blue', onClick: () => console.log('Add Product clicked') },
-    { icon: <EyeOutlined />, label: 'View Analytics', color: 'green', onClick: () => console.log('View Analytics clicked') },
-    { icon: <DollarOutlined />, label: 'View Orders', color: 'orange', onClick: () => console.log('View Orders clicked') },
-    { icon: <UserOutlined />, label: 'Customer Support', color: 'purple', onClick: () => console.log('Customer Support clicked') },
-  ] : [
-    { icon: <ShoppingCartOutlined />, label: 'Browse Products', color: 'blue', onClick: () => console.log('Browse Products clicked') },
-    { icon: <EyeOutlined />, label: 'Saved Items', color: 'green', onClick: () => console.log('Saved Items clicked') },
-    { icon: <DollarOutlined />, label: 'My Orders', color: 'orange', onClick: () => console.log('My Orders clicked') },
-    { icon: <UserOutlined />, label: 'Profile', color: 'purple', onClick: () => console.log('Profile clicked') },
-  ];
+  const stats = getRoleStats();
+  const recentData = getRecentData();
+  const quickActions = getQuickActions();
+  const progressData = getProgressData();
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'orange',
+      approved: 'green',
+      shipped: 'blue',
+      delivered: 'green',
+      completed: 'green',
+      info: 'blue'
+    };
+    return colors[status] || 'default';
+  };
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
+      {/* Welcome Section - Role-specific */}
       <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <Title level={2} className="text-white mb-2">
-          Welcome back, {user?.fullName}! 👋
+          Welcome back, {user?.firstName || user?.fullName || 'User'}! 👋
         </Title>
         <Text className="text-blue-100">
-          {isSeller 
-            ? "Here's how your store is performing today."
-            : "Here's what's happening with your orders today."
-          }
+          {isSeller && "Here's your business overview for today."}
+          {isBuyer && "Here's your shopping summary for today."}
+          {isAdmin && "Here's your platform overview for today."}
         </Text>
       </Card>
 
-      {/* Statistics Cards */}
+      {/* Key Statistics - Only relevant metrics */}
       <Row gutter={[16, 16]}>
         {stats.map((stat, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>
@@ -122,71 +221,25 @@ const Dashboard = () => {
                 prefix={stat.prefix}
                 styles={{ content: { color: stat.color } }}
               />
-              <div className="flex items-center mt-2">
-                <Text type="success" className="text-sm">
-                  {stat.increase}
-                </Text>
-                <Text className="text-gray-500 text-sm ml-2">from last month</Text>
-              </div>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* Progress and Activity Section */}
+      {/* Progress and Recent Activity - Only relevant data */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <Card title={isSeller ? "Store Goals" : "Monthly Goals"} className="h-full">
+          <Card title={isSeller ? "Business Goals" : isBuyer ? "Shopping Goals" : "Platform Goals"} className="h-full">
             <Space orientation="vertical" className="w-full">
-              {isSeller ? (
-                <>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Sales Target</Text>
-                      <Text>75%</Text>
-                    </div>
-                    <Progress percent={75} strokeColor="#52c41a" />
+              {progressData.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between mb-2">
+                    <Text>{item.label}</Text>
+                    <Text>{item.percent}%</Text>
                   </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Product Growth</Text>
-                      <Text>60%</Text>
-                    </div>
-                    <Progress percent={60} strokeColor="#1890ff" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Customer Satisfaction</Text>
-                      <Text>90%</Text>
-                    </div>
-                    <Progress percent={90} strokeColor="#faad14" />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Monthly Budget</Text>
-                      <Text>75%</Text>
-                    </div>
-                    <Progress percent={75} strokeColor="#52c41a" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Order Goal</Text>
-                      <Text>60%</Text>
-                    </div>
-                    <Progress percent={60} strokeColor="#1890ff" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <Text>Review Goal</Text>
-                      <Text>90%</Text>
-                    </div>
-                    <Progress percent={90} strokeColor="#faad14" />
-                  </div>
-                </>
-              )}
+                  <Progress percent={item.percent} strokeColor={item.color} />
+                </div>
+              ))}
             </Space>
           </Card>
         </Col>
@@ -194,16 +247,15 @@ const Dashboard = () => {
         <Col xs={24} lg={12}>
           <Card title="Recent Activity" className="h-full">
             <Space orientation="vertical" className="w-full">
-              {recentActivities.map((activity, index) => (
+              {recentData.map((item, index) => (
                 <div key={index} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded">
-                  <Avatar size="small" className="bg-blue-500">
-                    {activity.avatar}
-                  </Avatar>
+                  <Tag color={getStatusColor(item.status)} size="small">
+                    {item.type}
+                  </Tag>
                   <div className="flex-1">
-                    <Text strong>{activity.user}</Text>
-                    <Text className="text-gray-500 ml-2">{activity.action}</Text>
+                    <Text>{item.detail}</Text>
                   </div>
-                  <Text className="text-gray-400 text-sm">{activity.time}</Text>
+                  <Text className="text-gray-400 text-sm">{item.time}</Text>
                 </div>
               ))}
             </Space>
@@ -211,16 +263,16 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Only relevant actions */}
       <Card title="Quick Actions">
         <Row gutter={[16, 16]}>
           {quickActions.map((action, index) => (
-            <Col xs={24} sm={12} md={6} key={index}>
+            <Col xs={24} sm={12} md={8} key={index}>
               <Card 
                 className="text-center hover:shadow-md transition-shadow cursor-pointer"
-                onClick={action.onClick}
+                onClick={action.action}
               >
-                <div className={`text-2xl text-${action.color}-500 mb-2`}>
+                <div className="text-2xl text-blue-500 mb-2">
                   {action.icon}
                 </div>
                 <div>{action.label}</div>

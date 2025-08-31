@@ -1,28 +1,131 @@
-import React, { useState } from 'react';
-import { Card, Switch, Slider, Select, Button, Typography, Space, Divider, Row, Col, Input, message } from 'antd';
-import { SettingOutlined, BellOutlined, EyeOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, Switch, Select, Button, Typography, Space, Divider, Row, Col, Input, message, Spin } from 'antd';
+import { SettingOutlined, BellOutlined, UserOutlined } from '@ant-design/icons';
+import { useAuth } from '../context/AuthContext';
+import userService from '../services/userService';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const Settings = () => {
+  const { user, token, updateUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
+  
+  // Refs for input fields
+  const displayNameRef = useRef(null);
+  const emailRef = useRef(null);
+
   const [settings, setSettings] = useState({
     notifications: true,
-    emailNotifications: false,
-    darkMode: false,
-    accessibility: {
-      highContrast: false,
-      largeText: false,
-      reducedMotion: false,
-    },
-    privacy: {
-      profileVisibility: 'public',
-      dataSharing: false,
-      analytics: true,
-    },
+    emailNotifications: true,
     language: 'en',
-    timezone: 'UTC',
   });
+
+  const [profile, setProfile] = useState({
+    displayName: user?.fullName || '',
+    email: user?.email || '',
+  });
+
+  console.log('🔍 Settings component render:', { 
+    user: user ? { fullName: user.fullName, email: user.email } : null, 
+    token: !!token,
+    profile,
+    settings
+  });
+  
+  // Load user data on component mount
+  useEffect(() => {
+    if (user && token) {
+      loadUserData();
+    }
+  }, [user, token]);
+
+  // Update profile when user context changes
+  useEffect(() => {
+    if (user) {
+      setProfile(prev => ({
+        displayName: user.fullName || prev.displayName,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
+
+  // Debug component mount
+  useEffect(() => {
+    console.log('🏗️ Settings component mounted');
+    console.log('🔍 Initial user data:', user);
+    console.log('🔑 Initial token:', !!token);
+    console.log('🔍 Initial profile state:', profile);
+    console.log('🔍 Initial settings state:', settings);
+  }, []);
+
+  // Monitor state changes
+  useEffect(() => {
+    console.log('🔄 Profile state changed:', profile);
+  }, [profile]);
+
+  useEffect(() => {
+    console.log('🔄 Settings state changed:', settings);
+  }, [settings]);
+
+  // Force input field updates when profile changes
+  useEffect(() => {
+    console.log('🔄 Profile state updated:', profile);
+    
+    // Force input field updates if refs are available
+    if (displayNameRef.current && profile.displayName !== undefined) {
+      displayNameRef.current.input.value = profile.displayName;
+    }
+    
+    if (emailRef.current && profile.email !== undefined) {
+      emailRef.current.input.value = profile.email;
+    }
+  }, [profile]);
+
+  const loadUserData = async () => {
+    try {
+      setInitialLoading(true);
+      
+      console.log('🔄 Loading user data...');
+      console.log('🔍 User context:', { fullName: user?.fullName, email: user?.email });
+      
+      // Set initial profile data from user context
+      setProfile({
+        displayName: user?.fullName || '',
+        email: user?.email || '',
+      });
+      
+      // Try to load additional data from API
+      if (token) {
+        const profileData = await userService.getUserProfile(token);
+        console.log('📥 API profile data:', profileData);
+        
+        if (profileData?.user) {
+          setProfile({
+            displayName: profileData.user.fullName || user?.fullName || '',
+            email: profileData.user.email || user?.email || '',
+          });
+        }
+        
+        // Load settings if available
+        if (profileData?.user?.preferences?.notifications) {
+          setSettings({
+            notifications: profileData.user.preferences.notifications.push ?? true,
+            emailNotifications: profileData.user.preferences.notifications.email ?? true,
+            language: profileData.user.preferences.language ?? 'en',
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Error loading user data:', error);
+      // Keep the fallback data from user context
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -31,29 +134,262 @@ const Settings = () => {
     }));
   };
 
-  const handleAccessibilityChange = (key, value) => {
-    setSettings(prev => ({
+  const handleProfileChange = (key, value) => {
+    setProfile(prev => ({
       ...prev,
-      accessibility: {
-        ...prev.accessibility,
-        [key]: value
-      }
+      [key]: value
     }));
   };
 
-  const handlePrivacyChange = (key, value) => {
-    setSettings(prev => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: value
-      }
-    }));
+  // Show current state
+  const showCurrentState = () => {
+    console.log('🔍 Current component state:');
+    console.log('  - Profile state:', profile);
+    console.log('  - Settings state:', settings);
+    console.log('  - User context:', user);
+    console.log('  - Last update:', lastUpdate);
+    
+    message.info(`Profile: ${profile.displayName}, Email: ${profile.email}`);
   };
 
-  const handleSave = () => {
-    message.success('Settings saved successfully!');
+  // Refresh data from backend
+  const refreshData = async () => {
+    if (!token) {
+      message.error('Not authenticated');
+      return;
+    }
+
+    try {
+      setInitialLoading(true);
+      await loadUserData();
+      message.success('Data refreshed successfully!');
+    } catch (error) {
+      console.error('❌ Error refreshing data:', error);
+      message.error('Failed to refresh data');
+    } finally {
+      setInitialLoading(false);
+    }
   };
+
+  // Force refresh from backend
+  const forceRefresh = async () => {
+    console.log('🔄 Force refreshing data from backend...');
+    
+    if (!token) {
+      message.error('Not authenticated');
+      return;
+    }
+
+    try {
+      console.log('📡 Fetching fresh data from backend...');
+      const response = await userService.getUserProfile(token);
+      console.log('📥 Fresh data response:', response);
+      
+      if (response?.user) {
+        const freshData = response.user;
+        console.log('🔄 Updating state with fresh data:', freshData);
+        
+        const newProfile = {
+          displayName: freshData.fullName || '',
+          email: freshData.email || '',
+        };
+        
+        const newSettings = {
+          notifications: freshData.preferences?.notifications?.push ?? true,
+          emailNotifications: freshData.preferences?.notifications?.email ?? true,
+          language: settings.language,
+        };
+        
+        console.log('🔄 Setting fresh profile:', newProfile);
+        console.log('🔄 Setting fresh settings:', newSettings);
+        
+        setProfile(newProfile);
+        setSettings(newSettings);
+        setLastUpdate(Date.now());
+        
+        console.log('✅ Fresh data loaded successfully');
+        message.success('Fresh data loaded from backend!');
+      } else {
+        console.log('❌ No user data in response');
+        message.warning('No user data received from backend');
+      }
+    } catch (error) {
+      console.error('❌ Error force refreshing:', error);
+      message.error('Failed to refresh from backend');
+    }
+  };
+
+  // Check localStorage token
+  const checkLocalStorage = () => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    console.log('🔍 LocalStorage check:');
+    console.log('  - Token:', storedToken ? `${storedToken.substring(0, 20)}...` : 'null');
+    console.log('  - User:', storedUser ? JSON.parse(storedUser) : 'null');
+    console.log('  - Context token:', token ? `${token.substring(0, 20)}...` : 'null');
+    console.log('  - Context user:', user);
+  };
+
+  // Test function to debug API calls
+  const testAPICall = async () => {
+    console.log('🧪 Test API call started');
+    console.log('🔍 User context:', user);
+    console.log('🔑 Token available:', !!token);
+    console.log('🔑 Token length:', token ? token.length : 0);
+
+    if (!token) {
+      console.log('❌ No token available');
+      message.error('No authentication token available');
+      return;
+    }
+
+    try {
+      console.log('🧪 Testing simple API call...');
+      const testData = { fullName: 'TEST NAME', email: 'test@test.com' };
+      console.log('📤 Test data:', testData);
+
+      const response = await userService.updateProfile(testData, token);
+      console.log('📥 Test response:', response);
+
+      if (response?.success) {
+        message.success('Test API call successful!');
+        
+        // Try to update local state with the response data
+        console.log('🔄 Updating local state with test response...');
+        console.log('📥 Response user data:', response.user);
+        
+        if (response.user) {
+          const newProfile = {
+            displayName: response.user.fullName || 'TEST NAME',
+            email: response.user.email || 'test@test.com',
+          };
+          
+          console.log('🔄 Setting new profile state:', newProfile);
+          setProfile(newProfile);
+          setLastUpdate(Date.now());
+          
+          console.log('✅ Local state updated with test data');
+          message.info('Local state updated with test data');
+        }
+      } else {
+        message.error('Test API call failed');
+      }
+
+    } catch (error) {
+      console.error('❌ Test failed:', error);
+      message.error(`Test failed: ${error.message}`);
+    }
+  };
+
+  const handleSave = async () => {
+    console.log('🚀 Save button clicked!');
+    console.log('🔍 Current state:', { profile, settings, user, token: !!token });
+    
+    if (!token) {
+      message.error('User not authenticated');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Step 1: Update profile
+      console.log('📤 Step 1: Updating profile...');
+      const profileData = {
+        fullName: profile.displayName,
+        email: profile.email
+      };
+      
+      console.log('📤 Profile data to send:', profileData);
+      const profileResponse = await userService.updateProfile(profileData, token);
+      console.log('📥 Profile response:', profileResponse);
+      
+      if (profileResponse?.success) {
+        message.success('Profile updated successfully!');
+        
+        // Update local state with the response data
+        if (profileResponse.user) {
+          const updatedProfile = {
+            displayName: profileResponse.user.fullName || profile.displayName,
+            email: profileResponse.user.email || profile.email,
+          };
+          
+          setProfile(updatedProfile);
+          console.log('✅ Local state updated with saved data:', updatedProfile);
+          
+          // Update global user state in AuthContext
+          const updatedUser = {
+            ...user,
+            fullName: profileResponse.user.fullName,
+            email: profileResponse.user.email,
+          };
+          
+          updateUser(updatedUser);
+          console.log('✅ Global user state updated:', updatedUser);
+        }
+      } else {
+        throw new Error('Profile update failed');
+      }
+      
+      // Step 2: Update settings
+      console.log('📤 Step 2: Updating settings...');
+      const settingsData = {
+        preferences: {
+          notifications: {
+            email: settings.emailNotifications,
+            push: settings.notifications
+          }
+        }
+      };
+      
+      console.log('📤 Settings data to send:', settingsData);
+      const settingsResponse = await userService.updateProfile(settingsData, token);
+      console.log('📥 Settings response:', settingsResponse);
+      
+      if (!settingsResponse?.success) {
+        message.warning('Profile updated but settings failed to update');
+        return;
+      }
+      
+      message.success('Settings updated successfully!');
+
+      const updatedFields = [];
+      if (profile.displayName !== user?.fullName) updatedFields.push('Display Name');
+      if (profile.email !== user?.email) updatedFields.push('Email');
+      if (settings.notifications !== true) updatedFields.push('Push Notifications');
+      if (settings.emailNotifications !== true) updatedFields.push('Email Notifications');
+
+      if (updatedFields.length > 0) {
+        message.info(`Updated: ${updatedFields.join(', ')}`);
+      }
+
+      // Automatically refresh data from backend to ensure UI is up to date
+      console.log('🔄 Auto-refreshing data after successful save...');
+      await forceRefresh();
+      
+    } catch (error) {
+      console.error('❌ Error saving settings:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      
+      message.error(`Failed to save: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+        <Text className="ml-3">Loading your settings...</Text>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,7 +401,12 @@ const Settings = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Display Name
               </label>
-              <Input placeholder="Enter your display name" />
+              <Input 
+                placeholder="Enter your display name" 
+                value={profile.displayName || ''}
+                onChange={(e) => handleProfileChange('displayName', e.target.value)}
+                ref={displayNameRef}
+              />
             </div>
           </Col>
           <Col xs={24} md={12}>
@@ -73,7 +414,13 @@ const Settings = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
               </label>
-              <Input type="email" placeholder="Enter your email" />
+              <Input 
+                type="email" 
+                placeholder="Enter your email" 
+                value={profile.email || ''}
+                onChange={(e) => handleProfileChange('email', e.target.value)}
+                ref={emailRef}
+              />
             </div>
           </Col>
         </Row>
@@ -85,6 +432,7 @@ const Settings = () => {
                 Language
               </label>
               <Select
+                key={`language-${lastUpdate}`}
                 value={settings.language}
                 onChange={(value) => handleSettingChange('language', value)}
                 className="w-full"
@@ -92,26 +440,6 @@ const Settings = () => {
                 <Option value="en">English</Option>
                 <Option value="es">Spanish</Option>
                 <Option value="fr">French</Option>
-                <Option value="de">German</Option>
-                <Option value="zh">Chinese</Option>
-              </Select>
-            </div>
-          </Col>
-          <Col xs={24} md={12}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Timezone
-              </label>
-              <Select
-                value={settings.timezone}
-                onChange={(value) => handleSettingChange('timezone', value)}
-                className="w-full"
-              >
-                <Option value="UTC">UTC</Option>
-                <Option value="EST">Eastern Time</Option>
-                <Option value="PST">Pacific Time</Option>
-                <Option value="GMT">GMT</Option>
-                <Option value="CET">Central European Time</Option>
               </Select>
             </div>
           </Col>
@@ -146,149 +474,20 @@ const Settings = () => {
               onChange={(checked) => handleSettingChange('emailNotifications', checked)}
             />
           </div>
-          
-          <Divider />
-          
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>Dark Mode</Text>
-              <br />
-              <Text type="secondary">Use dark theme for better visibility</Text>
-            </div>
-            <Switch
-              checked={settings.darkMode}
-              onChange={(checked) => handleSettingChange('darkMode', checked)}
-            />
-          </div>
-        </Space>
-      </Card>
-
-      {/* Accessibility Settings */}
-      <Card title="Accessibility Settings" icon={<EyeOutlined />}>
-        <Space direction="vertical" className="w-full">
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>High Contrast Mode</Text>
-              <br />
-              <Text type="secondary">Increase contrast for better visibility</Text>
-            </div>
-            <Switch
-              checked={settings.accessibility.highContrast}
-              onChange={(checked) => handleAccessibilityChange('highContrast', checked)}
-            />
-          </div>
-          
-          <Divider />
-          
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>Large Text</Text>
-              <br />
-              <Text type="secondary">Use larger text for better readability</Text>
-            </div>
-            <Switch
-              checked={settings.accessibility.largeText}
-              onChange={(checked) => handleAccessibilityChange('largeText', checked)}
-            />
-          </div>
-          
-          <Divider />
-          
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>Reduced Motion</Text>
-              <br />
-              <Text type="secondary">Reduce animations and transitions</Text>
-            </div>
-            <Switch
-              checked={settings.accessibility.reducedMotion}
-              onChange={(checked) => handleAccessibilityChange('reducedMotion', checked)}
-            />
-          </div>
-          
-          <Divider />
-          
-          <div>
-            <Text strong>Text Size</Text>
-            <br />
-            <Text type="secondary">Adjust text size for better readability</Text>
-            <div className="mt-4">
-              <Slider
-                min={12}
-                max={24}
-                defaultValue={16}
-                marks={{
-                  12: 'Small',
-                  16: 'Medium',
-                  20: 'Large',
-                  24: 'Extra Large'
-                }}
-                className="w-full"
-              />
-            </div>
-          </div>
-        </Space>
-      </Card>
-
-      {/* Privacy Settings */}
-      <Card title="Privacy Settings" icon={<LockOutlined />}>
-        <Space direction="vertical" className="w-full">
-          <div>
-            <Text strong>Profile Visibility</Text>
-            <br />
-            <Text type="secondary">Control who can see your profile</Text>
-            <div className="mt-2">
-              <Select
-                value={settings.privacy.profileVisibility}
-                onChange={(value) => handlePrivacyChange('profileVisibility', value)}
-                className="w-full"
-              >
-                <Option value="public">Public</Option>
-                <Option value="friends">Friends Only</Option>
-                <Option value="private">Private</Option>
-              </Select>
-            </div>
-          </div>
-          
-          <Divider />
-          
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>Data Sharing</Text>
-              <br />
-              <Text type="secondary">Allow sharing of your data for research</Text>
-            </div>
-            <Switch
-              checked={settings.privacy.dataSharing}
-              onChange={(checked) => handlePrivacyChange('dataSharing', checked)}
-            />
-          </div>
-          
-          <Divider />
-          
-          <div className="flex justify-between items-center">
-            <div>
-              <Text strong>Analytics</Text>
-              <br />
-              <Text type="secondary">Help us improve by sharing usage analytics</Text>
-            </div>
-            <Switch
-              checked={settings.privacy.analytics}
-              onChange={(checked) => handlePrivacyChange('analytics', checked)}
-            />
-          </div>
         </Space>
       </Card>
 
       {/* Save Button */}
-      <div className="text-center">
+      <div className="text-center space-y-4">
         <Button
           type="primary"
           size="large"
           onClick={handleSave}
+          loading={loading}
+          disabled={loading}
           className="px-8"
         >
-          Save Settings
+          {loading ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>

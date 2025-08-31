@@ -342,3 +342,4 @@ const CheckoutPage = ({ onBack, onOrderSuccess }) => {
 };
 
 export default CheckoutPage;
+

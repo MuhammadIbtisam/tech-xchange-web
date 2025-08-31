@@ -5,7 +5,7 @@ const OrderContext = createContext();
 // Order status constants
 export const ORDER_STATUS = {
   pending: 'pending',
-  processing: 'processing',
+  confirmed: 'confirmed',
   shipped: 'shipped',
   delivered: 'delivered',
   cancelled: 'cancelled'

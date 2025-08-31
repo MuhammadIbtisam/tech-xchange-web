@@ -75,14 +75,35 @@ class OrderService {
   }
 
   // Update order status
-  async updateOrderStatus(orderId, status, token) {
+  async updateOrderStatus(orderId, status, token, userRole = 'seller') {
     try {
-      console.log('🔄 Updating order status:', { orderId, status });
-      const response = await apiService.put(`/orders/${orderId}/status`, { status }, token);
+      console.log('🔄 Updating order status:', { orderId, status, userRole });
+      
+      // Use the correct endpoint based on user role
+      const endpoint = userRole === 'seller' 
+        ? `/orders/seller/${orderId}/status`
+        : `/orders/buyer/${orderId}/status`;
+      
+      console.log('🔗 Calling endpoint:', endpoint);
+      console.log('📤 Request payload:', { status });
+      console.log('🔑 Token present:', !!token);
+      
+      const response = await apiService.put(endpoint, { status }, token);
       console.log('✅ Order status updated:', response);
+      
+      // Check if the backend operation was successful
+      if (response && response.success === false) {
+        throw new Error(response.message || 'Status update failed');
+      }
+      
       return response;
     } catch (error) {
       console.error('❌ Error updating order status:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
       throw error;
     }
   }

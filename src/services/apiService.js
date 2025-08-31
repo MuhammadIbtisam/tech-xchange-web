@@ -2,12 +2,14 @@ import API_CONFIG, { getApiUrl, getAuthHeaders } from '../config/api.js';
 
 class ApiService {
   constructor() {
-    this.baseURL = API_CONFIG.BASE_URL;
-    this.timeout = API_CONFIG.TIMEOUT;
+    this.timeout = API_CONFIG.TIMEOUT || 10000;
   }
 
   async request(endpoint, options = {}) {
     const url = getApiUrl(endpoint);
+    console.log('🌐 Making HTTP request to:', url);
+    console.log('📋 Request options:', options);
+    
     const config = {
       headers: API_CONFIG.DEFAULT_HEADERS,
       ...options,
@@ -17,9 +19,15 @@ class ApiService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+      console.log('📡 Sending fetch request...');
       const response = await fetch(url, {
         ...config,
         signal: controller.signal,
+      });
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
       });
 
       clearTimeout(timeoutId);
@@ -90,12 +98,22 @@ class ApiService {
 
   // PUT request
   async put(endpoint, data, token = null) {
+    console.log('🔄 ApiService.put called');
+    console.log('🔗 Endpoint:', endpoint);
+    console.log('📤 Data:', data);
+    console.log('🔑 Token present:', !!token);
+    
     const headers = token ? getAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS;
-    return this.request(endpoint, {
+    console.log('📋 Headers:', headers);
+    
+    const result = await this.request(endpoint, {
       method: 'PUT',
       headers,
       body: JSON.stringify(data),
     });
+    
+    console.log('📥 ApiService.put result:', result);
+    return result;
   }
 
   // DELETE request

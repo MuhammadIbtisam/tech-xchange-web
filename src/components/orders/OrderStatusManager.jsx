@@ -18,7 +18,8 @@ import {
   TruckFilled, 
   CloseCircleOutlined,
   ClockCircleOutlined,
-  ShoppingOutlined
+  ShoppingOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons';
 
 const { TextArea } = Input;
@@ -27,7 +28,7 @@ const { Text } = Typography;
 
 const ORDER_STATUS = {
   pending: { label: 'Pending', color: 'orange', icon: <ClockCircleOutlined /> },
-  processing: { label: 'Processing', color: 'blue', icon: <ShoppingOutlined /> },
+  confirmed: { label: 'Confirmed', color: 'blue', icon: <CheckCircleOutlined /> },
   shipped: { label: 'Shipped', color: 'cyan', icon: <TruckFilled /> },
   delivered: { label: 'Delivered', color: 'green', icon: <CheckOutlined /> },
   cancelled: { label: 'Cancelled', color: 'red', icon: <CloseCircleOutlined /> }
@@ -78,11 +79,11 @@ const OrderStatusManager = ({
     switch (currentStatus) {
       case 'pending':
         options.push(
-          { value: 'processing', label: 'Processing', icon: <ShoppingOutlined /> },
+          { value: 'confirmed', label: 'Confirmed', icon: <CheckCircleOutlined /> },
           { value: 'cancelled', label: 'Cancelled', icon: <CloseCircleOutlined /> }
         );
         break;
-      case 'processing':
+      case 'confirmed':
         options.push(
           { value: 'shipped', label: 'Shipped', icon: <TruckFilled /> },
           { value: 'cancelled', label: 'Cancelled', icon: <CloseCircleOutlined /> }
@@ -215,8 +216,8 @@ const OrderStatusManager = ({
               <ClockCircleOutlined className="text-orange-500" />
               <span>Pending</span>
               <span>→</span>
-              <ShoppingOutlined className="text-blue-500" />
-              <span>Processing</span>
+              <CheckCircleOutlined className="text-blue-500" />
+              <span>Confirmed</span>
               <span>→</span>
               <TruckFilled className="text-cyan-500" />
               <span>Shipped</span>
@@ -248,3 +249,4 @@ const OrderStatusManager = ({
 };
 
 export default OrderStatusManager;
+
