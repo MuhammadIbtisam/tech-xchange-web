@@ -110,7 +110,7 @@ const ProductsPage = ({ onProductView }) => {
   // Handle page size changes and ensure current page is valid
   useEffect(() => {
     const maxPage = Math.ceil(totalProducts / pageSize);
-    console.log('📄 Pagination state:', { currentPage, pageSize, totalProducts, maxPage });
+    console.log(' Pagination state:', { currentPage, pageSize, totalProducts, maxPage });
     
     // If current page exceeds max page, reset to max page
     if (currentPage > maxPage && maxPage > 0) {
@@ -191,24 +191,24 @@ const ProductsPage = ({ onProductView }) => {
       // Remove undefined values
       Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
 
-      console.log('🔍 Loading products with params:', params); // Debug log
-      console.log('🔍 Selected Category:', selectedCategory); // Debug log
-      console.log('🔍 Selected Brand:', selectedBrand); // Debug log
+      console.log(' Loading products with params:', params); // Debug log
+      console.log(' Selected Category:', selectedCategory); // Debug log
+      console.log(' Selected Brand:', selectedBrand); // Debug log
 
       const response = await productService.getProducts(params);
       
-      console.log('📦 Products API Response:', response); // Debug log
+      console.log(' Products API Response:', response); // Debug log
       
       if (response.success) {
         setProducts(response.products || []); // Changed from response.data to response.products
         setTotalProducts(response.pagination?.totalProducts || 0); // Changed from total to totalProducts
-        console.log('✅ Products loaded:', response.products?.length || 0); // Debug log
-        console.log('📄 Pagination info:', response.pagination); // Debug log
+        console.log(' Products loaded:', response.products?.length || 0); // Debug log
+        console.log(' Pagination info:', response.pagination); // Debug log
       } else {
         message.error(response.message || 'Failed to load products');
       }
     } catch (error) {
-      console.error('❌ Error loading products:', error);
+      console.error(' Error loading products:', error);
       message.error('Failed to load products');
     } finally {
       setLoading(false);

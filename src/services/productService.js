@@ -103,31 +103,84 @@ class ProductService {
   }
 
   // User: Add product to saved items
-  async addToSavedItems(productId, token) {
-    console.log('🔍 Adding to saved items:', { productId, token: token ? 'Present' : 'Missing' });
+  async addToSavedItems(productId, token, notes = '') {
+    console.log(' Adding to saved items:', { productId, notes, token: token ? 'Present' : 'Missing' });
     try {
-      const response = await apiService.post(`/saved-items/user/product/${productId}`, {}, token);
-      console.log('✅ Save response:', response);
+      const requestBody = notes ? { notes } : {};
+      const response = await apiService.post(`/saved-items/user/product/${productId}`, requestBody, token);
+      console.log(' Save response:', response);
       return response;
     } catch (error) {
-      console.error('❌ Save error:', error);
+      console.error(' Save error:', error);
+      console.error(' Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        productId,
+        notes,
+        hasToken: !!token
+      });
+      
+      // Check if it's a backend error
+      if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+        console.error(' Backend error detected - this is a server-side issue');
+        console.error(' The saved items endpoint may not be implemented or has a bug');
+      }
+      
       throw error;
     }
   }
 
   // User: Remove product from saved items
   async removeFromSavedItems(savedItemId, token) {
-    return await apiService.delete(`/saved-items/user/${savedItemId}`, token);
+    console.log(' Removing from saved items:', { savedItemId, token: token ? 'Present' : 'Missing' });
+    try {
+      const response = await apiService.delete(`/saved-items/user/${savedItemId}`, token);
+      console.log(' Remove response:', response);
+      return response;
+    } catch (error) {
+      console.error(' Remove error:', error);
+      throw error;
+    }
   }
 
   // User: Check if product is saved
   async checkIfSaved(productId, token) {
-    return await apiService.get(`/saved-items/user/check/${productId}`, token);
+    console.log(' Checking if saved:', { productId, token: token ? 'Present' : 'Missing' });
+    try {
+      const response = await apiService.get(`/saved-items/user/check/${productId}`, token);
+      console.log(' Check response:', response);
+      return response;
+    } catch (error) {
+      console.error(' Check error:', error);
+      throw error;
+    }
   }
 
   // User: Get my saved items
-  async getMySavedItems(token) {
-    return await apiService.get('/saved-items/user/my-saved-items', token);
+  async getMySavedItems(token, page = 1, limit = 10) {
+    console.log(' Getting saved items:', { page, limit, token: token ? 'Present' : 'Missing' });
+    try {
+      const response = await apiService.get(`/saved-items/user/my-saved-items?page=${page}&limit=${limit}`, token);
+      console.log(' Get saved items response:', response);
+      return response;
+    } catch (error) {
+      console.error(' Get saved items error:', error);
+      throw error;
+    }
+  }
+
+  // User: Update saved item notes
+  async updateSavedItem(savedItemId, notes, token) {
+    console.log(' Updating saved item:', { savedItemId, notes, token: token ? 'Present' : 'Missing' });
+    try {
+      const response = await apiService.put(`/saved-items/user/${savedItemId}`, { notes }, token);
+      console.log(' Update saved item response:', response);
+      return response;
+    } catch (error) {
+      console.error(' Update saved item error:', error);
+      throw error;
+    }
   }
 }
 

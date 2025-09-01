@@ -85,7 +85,7 @@ const CheckoutPage = ({ onBack, onOrderSuccess }) => {
         notes: values.notes || ''
       };
 
-      console.log('📦 Creating order with data:', orderData);
+      console.log(' Creating order with data:', orderData);
 
       // Create order using service
       const token = localStorage.getItem('token');
@@ -101,7 +101,7 @@ const CheckoutPage = ({ onBack, onOrderSuccess }) => {
         onOrderSuccess(newOrder);
       }
     } catch (error) {
-      console.error('❌ Error creating order:', error);
+      console.error(' Error creating order:', error);
       message.error(`Failed to create order: ${error.message}`);
     } finally {
       setSubmitting(false);
@@ -342,4 +342,5 @@ const CheckoutPage = ({ onBack, onOrderSuccess }) => {
 };
 
 export default CheckoutPage;
+
 

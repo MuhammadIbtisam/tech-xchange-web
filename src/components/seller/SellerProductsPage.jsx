@@ -95,7 +95,7 @@ const SellerProductsPage = ({ onProductView }) => {
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     
-    console.log('🔍 Editing product:', product);
+    console.log(' Editing product:', product);
     
     // Wait for form to be ready before setting fields
     setTimeout(() => {
@@ -150,10 +150,10 @@ const SellerProductsPage = ({ onProductView }) => {
         productData.description = values.description.trim();
       }
       
-      console.log('🧪 Testing with minimal data structure');
+      console.log(' Testing with minimal data structure');
       console.log('📋 Form values received:', values);
-      console.log('📦 Final data to send:', productData);
-      console.log('📤 Data types:', {
+      console.log(' Final data to send:', productData);
+      console.log(' Data types:', {
         price: typeof productData.price,
         condition: typeof productData.condition,
         stock: typeof productData.stock,
@@ -162,13 +162,13 @@ const SellerProductsPage = ({ onProductView }) => {
       
       // Test with minimal data first
       if (editingProduct) {
-        console.log('🧪 Testing minimal update...');
+        console.log(' Testing minimal update...');
         const minimalData = {
           price: productData.price,
           condition: productData.condition,
           stock: productData.stock
         };
-        console.log('🧪 Minimal data:', minimalData);
+        console.log(' Minimal data:', minimalData);
       }
 
       if (editingProduct) {
@@ -177,7 +177,7 @@ const SellerProductsPage = ({ onProductView }) => {
           throw new Error('Invalid product ID');
         }
         
-        console.log('🔍 Updating product:', {
+        console.log(' Updating product:', {
           productId: editingProduct._id,
           productData: productData,
           originalProduct: editingProduct,
@@ -194,15 +194,15 @@ const SellerProductsPage = ({ onProductView }) => {
         
         // Log the exact data structure being sent
         console.log('📋 Raw form values:', values);
-        console.log('📦 Processed product data:', productData);
-        console.log('🔑 Product ID type:', typeof editingProduct._id);
-        console.log('🔑 Product ID value:', editingProduct._id);
+        console.log(' Processed product data:', productData);
+        console.log(' Product ID type:', typeof editingProduct._id);
+        console.log(' Product ID value:', editingProduct._id);
         
         const updateResponse = await productService.updateProduct(editingProduct._id, productData, token);
-        console.log('✅ Update response:', updateResponse);
+        console.log(' Update response:', updateResponse);
         message.success('Product updated successfully');
       } else {
-        console.log('🔍 Creating product:', {
+        console.log(' Creating product:', {
           productData: productData,
           token: token ? 'Present' : 'Missing'
         });
@@ -214,9 +214,9 @@ const SellerProductsPage = ({ onProductView }) => {
           productTypeId: "68af3cfa18206ea57992f409" // Placeholder - this should come from a form selection
         };
         
-        console.log('📤 Creating product with data:', createData);
+        console.log(' Creating product with data:', createData);
         const createResponse = await productService.createProduct(createData, token);
-        console.log('✅ Create response:', createResponse);
+        console.log(' Create response:', createResponse);
         message.success('Product created successfully');
       }
       

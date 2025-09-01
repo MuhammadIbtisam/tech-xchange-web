@@ -28,7 +28,7 @@ const Settings = () => {
     email: user?.email || '',
   });
 
-  console.log('🔍 Settings component render:', { 
+  console.log(' Settings component render:', { 
     user: user ? { fullName: user.fullName, email: user.email } : null, 
     token: !!token,
     profile,
@@ -55,10 +55,10 @@ const Settings = () => {
   // Debug component mount
   useEffect(() => {
     console.log('🏗️ Settings component mounted');
-    console.log('🔍 Initial user data:', user);
-    console.log('🔑 Initial token:', !!token);
-    console.log('🔍 Initial profile state:', profile);
-    console.log('🔍 Initial settings state:', settings);
+    console.log(' Initial user data:', user);
+    console.log(' Initial token:', !!token);
+    console.log(' Initial profile state:', profile);
+    console.log(' Initial settings state:', settings);
   }, []);
 
   // Monitor state changes
@@ -89,7 +89,7 @@ const Settings = () => {
       setInitialLoading(true);
       
       console.log('🔄 Loading user data...');
-      console.log('🔍 User context:', { fullName: user?.fullName, email: user?.email });
+      console.log(' User context:', { fullName: user?.fullName, email: user?.email });
       
       // Set initial profile data from user context
       setProfile({
@@ -120,7 +120,7 @@ const Settings = () => {
       }
       
     } catch (error) {
-      console.error('❌ Error loading user data:', error);
+      console.error(' Error loading user data:', error);
       // Keep the fallback data from user context
     } finally {
       setInitialLoading(false);
@@ -143,7 +143,7 @@ const Settings = () => {
 
   // Show current state
   const showCurrentState = () => {
-    console.log('🔍 Current component state:');
+    console.log(' Current component state:');
     console.log('  - Profile state:', profile);
     console.log('  - Settings state:', settings);
     console.log('  - User context:', user);
@@ -164,7 +164,7 @@ const Settings = () => {
       await loadUserData();
       message.success('Data refreshed successfully!');
     } catch (error) {
-      console.error('❌ Error refreshing data:', error);
+      console.error(' Error refreshing data:', error);
       message.error('Failed to refresh data');
     } finally {
       setInitialLoading(false);
@@ -207,14 +207,14 @@ const Settings = () => {
         setSettings(newSettings);
         setLastUpdate(Date.now());
         
-        console.log('✅ Fresh data loaded successfully');
+        console.log(' Fresh data loaded successfully');
         message.success('Fresh data loaded from backend!');
       } else {
-        console.log('❌ No user data in response');
+        console.log(' No user data in response');
         message.warning('No user data received from backend');
       }
     } catch (error) {
-      console.error('❌ Error force refreshing:', error);
+      console.error(' Error force refreshing:', error);
       message.error('Failed to refresh from backend');
     }
   };
@@ -224,7 +224,7 @@ const Settings = () => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
-    console.log('🔍 LocalStorage check:');
+    console.log(' LocalStorage check:');
     console.log('  - Token:', storedToken ? `${storedToken.substring(0, 20)}...` : 'null');
     console.log('  - User:', storedUser ? JSON.parse(storedUser) : 'null');
     console.log('  - Context token:', token ? `${token.substring(0, 20)}...` : 'null');
@@ -233,21 +233,21 @@ const Settings = () => {
 
   // Test function to debug API calls
   const testAPICall = async () => {
-    console.log('🧪 Test API call started');
-    console.log('🔍 User context:', user);
-    console.log('🔑 Token available:', !!token);
-    console.log('🔑 Token length:', token ? token.length : 0);
+    console.log(' Test API call started');
+    console.log(' User context:', user);
+    console.log(' Token available:', !!token);
+    console.log(' Token length:', token ? token.length : 0);
 
     if (!token) {
-      console.log('❌ No token available');
+      console.log(' No token available');
       message.error('No authentication token available');
       return;
     }
 
     try {
-      console.log('🧪 Testing simple API call...');
+      console.log(' Testing simple API call...');
       const testData = { fullName: 'TEST NAME', email: 'test@test.com' };
-      console.log('📤 Test data:', testData);
+      console.log(' Test data:', testData);
 
       const response = await userService.updateProfile(testData, token);
       console.log('📥 Test response:', response);
@@ -269,7 +269,7 @@ const Settings = () => {
           setProfile(newProfile);
           setLastUpdate(Date.now());
           
-          console.log('✅ Local state updated with test data');
+          console.log(' Local state updated with test data');
           message.info('Local state updated with test data');
         }
       } else {
@@ -277,14 +277,14 @@ const Settings = () => {
       }
 
     } catch (error) {
-      console.error('❌ Test failed:', error);
+      console.error(' Test failed:', error);
       message.error(`Test failed: ${error.message}`);
     }
   };
 
   const handleSave = async () => {
     console.log('🚀 Save button clicked!');
-    console.log('🔍 Current state:', { profile, settings, user, token: !!token });
+    console.log(' Current state:', { profile, settings, user, token: !!token });
     
     if (!token) {
       message.error('User not authenticated');
@@ -295,13 +295,13 @@ const Settings = () => {
       setLoading(true);
       
       // Step 1: Update profile
-      console.log('📤 Step 1: Updating profile...');
+      console.log(' Step 1: Updating profile...');
       const profileData = {
         fullName: profile.displayName,
         email: profile.email
       };
       
-      console.log('📤 Profile data to send:', profileData);
+      console.log(' Profile data to send:', profileData);
       const profileResponse = await userService.updateProfile(profileData, token);
       console.log('📥 Profile response:', profileResponse);
       
@@ -316,7 +316,7 @@ const Settings = () => {
           };
           
           setProfile(updatedProfile);
-          console.log('✅ Local state updated with saved data:', updatedProfile);
+          console.log(' Local state updated with saved data:', updatedProfile);
           
           // Update global user state in AuthContext
           const updatedUser = {
@@ -326,14 +326,14 @@ const Settings = () => {
           };
           
           updateUser(updatedUser);
-          console.log('✅ Global user state updated:', updatedUser);
+          console.log(' Global user state updated:', updatedUser);
         }
       } else {
         throw new Error('Profile update failed');
       }
       
       // Step 2: Update settings
-      console.log('📤 Step 2: Updating settings...');
+      console.log(' Step 2: Updating settings...');
       const settingsData = {
         preferences: {
           notifications: {
@@ -343,7 +343,7 @@ const Settings = () => {
         }
       };
       
-      console.log('📤 Settings data to send:', settingsData);
+      console.log(' Settings data to send:', settingsData);
       const settingsResponse = await userService.updateProfile(settingsData, token);
       console.log('📥 Settings response:', settingsResponse);
       
@@ -369,8 +369,8 @@ const Settings = () => {
       await forceRefresh();
       
     } catch (error) {
-      console.error('❌ Error saving settings:', error);
-      console.error('❌ Error details:', {
+      console.error(' Error saving settings:', error);
+      console.error(' Error details:', {
         message: error.message,
         name: error.name,
         stack: error.stack

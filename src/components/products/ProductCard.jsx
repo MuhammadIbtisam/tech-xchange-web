@@ -45,7 +45,7 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, onProductView, view
     try {
       // Get token from localStorage since it's not exposed in auth context
       const token = localStorage.getItem('token');
-      console.log('🔑 Token found:', token ? 'Yes' : 'No', 'User ID:', user?._id);
+      console.log(' Token found:', token ? 'Yes' : 'No', 'User ID:', user?._id);
       
       if (!token) {
         console.warn('No token found for saved status check');
@@ -55,7 +55,16 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, onProductView, view
 
       const response = await productService.checkIfSaved(product._id, token);
       console.log('💾 Saved status response:', response);
-      setIsSaved(response.isSaved || false);
+      
+      if (response.success && response.data) {
+        setIsSaved(response.data.isSaved || false);
+        // Update product with savedItemId if available
+        if (response.data.savedItem && response.data.savedItem._id) {
+          product.savedItemId = response.data.savedItem._id;
+        }
+      } else {
+        setIsSaved(false);
+      }
     } catch (error) {
       console.error('Error checking saved status:', error);
       // Don't show error to user, just set as not saved
@@ -69,49 +78,44 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, onProductView, view
       return;
     }
 
-    // Get token from localStorage
-    const token = localStorage.getItem('token');
-    console.log('🔑 Save toggle - Token found:', token ? 'Yes' : 'No');
-    console.log('🔑 Token details:', {
-      length: token ? token.length : 0,
-      startsWith: token ? token.substring(0, 20) + '...' : 'None',
-      endsWith: token ? '...' + token.substring(token.length - 20) : 'None'
-    });
-    
-    if (!token) {
-      message.error('Authentication token not found');
-      return;
-    }
-
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        message.error('Authentication token not found');
+        return;
+      }
+
       if (isSaved) {
-        // For removal, we need the savedItemId from the product or check response
-        if (!product.savedItemId) {
-          // Try to get the saved item ID first
-          const checkResponse = await productService.checkIfSaved(product._id, token);
-          if (checkResponse.savedItemId) {
-            await productService.removeFromSavedItems(checkResponse.savedItemId, token);
-          } else {
-            // If no savedItemId found, just update local state
+        // Remove from saved items
+        if (product.savedItemId) {
+          const response = await productService.removeFromSavedItems(product.savedItemId, token);
+          if (response.success) {
             setIsSaved(false);
             message.success('Removed from saved items');
-            return;
+          } else {
+            throw new Error(response.message || 'Failed to remove item');
           }
         } else {
-          await productService.removeFromSavedItems(product.savedItemId, token);
+          // If no savedItemId, try to remove by productId
+          const response = await productService.removeFromSavedItems(product._id, token);
+          if (response.success) {
+            setIsSaved(false);
+            message.success('Removed from saved items');
+          } else {
+            throw new Error(response.message || 'Failed to remove item');
+          }
         }
-        setIsSaved(false);
-        message.success('Removed from saved items');
       } else {
+        // Add to saved items
         const response = await productService.addToSavedItems(product._id, token);
         console.log('Save response:', response);
         
         if (response.success) {
           setIsSaved(true);
           // Update the product with the savedItemId if returned
-          if (response.savedItemId) {
-            product.savedItemId = response.savedItemId;
+          if (response.data && response.data._id) {
+            product.savedItemId = response.data._id;
           }
           message.success('Added to saved items');
         } else {
@@ -127,23 +131,16 @@ const ProductCard = ({ product, onEdit, onDelete, onRefresh, onProductView, view
         isServerError: error.message.includes('500') || error.message.includes('Internal Server Error')
       });
       
-      // Check if it's a network/server error - be more comprehensive
-      const isServerError = error.message.includes('500') || 
-                           error.message.includes('Internal Server Error') || 
-                           error.message.includes('Error adding to saved items') ||
-                           error.message.includes('Error removing from saved items') ||
-                           error.message.includes('Network Error') ||
-                           error.message.includes('fetch failed');
-      
-      if (isServerError) {
-        message.error('Server error - please try again later. The save feature may be temporarily unavailable.');
-        
-        // For now, let's simulate the save locally so the UI works
-        // This is a temporary fix until the backend is working
-        if (!isSaved) {
-          setIsSaved(true);
-          message.info('Saved locally (server sync pending)');
-        }
+      // Handle specific error cases based on the new API
+      if (error.message.includes('Product is already in your saved items')) {
+        message.warning('Product is already saved');
+        setIsSaved(true);
+      } else if (error.message.includes('Product not found')) {
+        message.error('Product not found');
+      } else if (error.message.includes('Cannot save unapproved products')) {
+        message.error('Cannot save unapproved products');
+      } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+        message.error('Server error - please try again later');
       } else if (error.message.includes('401')) {
         message.error('Authentication failed - please login again');
       } else if (error.message.includes('404')) {

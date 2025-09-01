@@ -51,10 +51,10 @@ class ApiService {
         
         // For 500 errors, try to get more details
         if (response.status === 500) {
-          console.error('🔍 Backend 500 error details:', data);
-          console.error('🔍 Error data type:', typeof data);
-          console.error('🔍 Error data keys:', Object.keys(data || {}));
-          console.error('🔍 Full error response:', JSON.stringify(data, null, 2));
+          console.error(' Backend 500 error details:', data);
+          console.error(' Error data type:', typeof data);
+          console.error(' Error data keys:', Object.keys(data || {}));
+          console.error(' Full error response:', JSON.stringify(data, null, 2));
           
           // Try to extract more specific error information
           let errorMessage = 'Internal server error';
@@ -100,8 +100,8 @@ class ApiService {
   async put(endpoint, data, token = null) {
     console.log('🔄 ApiService.put called');
     console.log('🔗 Endpoint:', endpoint);
-    console.log('📤 Data:', data);
-    console.log('🔑 Token present:', !!token);
+    console.log(' Data:', data);
+    console.log(' Token present:', !!token);
     
     const headers = token ? getAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS;
     console.log('📋 Headers:', headers);

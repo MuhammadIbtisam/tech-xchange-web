@@ -5,12 +5,12 @@ class OrderService {
   async createOrder(productId, orderData, token) {
     try {
       console.log('🚀 Creating order for product:', productId);
-      console.log('📦 Order data:', orderData);
+      console.log(' Order data:', orderData);
       const response = await apiService.post(`/orders/buyer/product/${productId}`, orderData, token);
-      console.log('✅ Order created successfully:', response);
+      console.log(' Order created successfully:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error creating order:', error);
+      console.error(' Error creating order:', error);
       throw error;
     }
   }
@@ -18,7 +18,7 @@ class OrderService {
   // Get orders for buyer
   async getBuyerOrders(token) {
     try {
-      console.log('🔍 Fetching buyer orders...');
+      console.log(' Fetching buyer orders...');
       // Try different possible endpoints
       let response;
       try {
@@ -40,10 +40,10 @@ class OrderService {
           throw error;
         }
       }
-      console.log('✅ Buyer orders fetched:', response);
+      console.log(' Buyer orders fetched:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error fetching buyer orders:', error);
+      console.error(' Error fetching buyer orders:', error);
       throw error;
     }
   }
@@ -51,12 +51,12 @@ class OrderService {
   // Get orders for seller
   async getSellerOrders(token) {
     try {
-      console.log('🔍 Fetching seller orders...');
+      console.log(' Fetching seller orders...');
       const response = await apiService.get('/orders/seller/my-orders', token);
-      console.log('✅ Seller orders fetched:', response);
+      console.log(' Seller orders fetched:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error fetching seller orders:', error);
+      console.error(' Error fetching seller orders:', error);
       throw error;
     }
   }
@@ -64,12 +64,12 @@ class OrderService {
   // Get order by ID
   async getOrderById(orderId, token) {
     try {
-      console.log('🔍 Fetching order:', orderId);
+      console.log(' Fetching order:', orderId);
       const response = await apiService.get(`/orders/${orderId}`, token);
-      console.log('✅ Order fetched:', response);
+      console.log(' Order fetched:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error fetching order:', error);
+      console.error(' Error fetching order:', error);
       throw error;
     }
   }
@@ -85,11 +85,11 @@ class OrderService {
         : `/orders/buyer/${orderId}/status`;
       
       console.log('🔗 Calling endpoint:', endpoint);
-      console.log('📤 Request payload:', { status });
-      console.log('🔑 Token present:', !!token);
+      console.log(' Request payload:', { status });
+      console.log(' Token present:', !!token);
       
       const response = await apiService.put(endpoint, { status }, token);
-      console.log('✅ Order status updated:', response);
+      console.log(' Order status updated:', response);
       
       // Check if the backend operation was successful
       if (response && response.success === false) {
@@ -98,8 +98,8 @@ class OrderService {
       
       return response;
     } catch (error) {
-      console.error('❌ Error updating order status:', error);
-      console.error('❌ Error details:', {
+      console.error(' Error updating order status:', error);
+      console.error(' Error details:', {
         message: error.message,
         name: error.name,
         stack: error.stack
@@ -111,12 +111,12 @@ class OrderService {
   // Cancel order
   async cancelOrder(orderId, token) {
     try {
-      console.log('❌ Cancelling order:', orderId);
+      console.log(' Cancelling order:', orderId);
       const response = await apiService.put(`/orders/${orderId}/cancel`, {}, token);
-      console.log('✅ Order cancelled:', response);
+      console.log(' Order cancelled:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error cancelling order:', error);
+      console.error(' Error cancelling order:', error);
       throw error;
     }
   }
@@ -127,10 +127,10 @@ class OrderService {
       console.log('📊 Fetching order statistics for:', userRole);
       const endpoint = userRole === 'seller' ? '/orders/seller/stats' : '/orders/buyer/stats';
       const response = await apiService.get(endpoint, token);
-      console.log('✅ Order stats fetched:', response);
+      console.log(' Order stats fetched:', response);
       return response;
     } catch (error) {
-      console.error('❌ Error fetching order stats:', error);
+      console.error(' Error fetching order stats:', error);
       throw error;
     }
   }

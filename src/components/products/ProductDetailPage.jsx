@@ -39,7 +39,7 @@ const ProductDetailPage = ({ product, onBack, onRefresh, onProductView }) => {
   const { addToCart, isInCart } = useCart();
   
   // Debug: Log props to see what's being passed
-  console.log('🔍 ProductDetailPage props:', { 
+  console.log(' ProductDetailPage props:', { 
     hasProduct: !!product, 
     hasOnBack: !!onBack, 
     hasOnRefresh: !!onRefresh, 
@@ -102,8 +102,8 @@ const ProductDetailPage = ({ product, onBack, onRefresh, onProductView }) => {
     }
 
     const token = localStorage.getItem('token');
-    console.log('🔑 Save toggle - Token found:', token ? 'Yes' : 'No');
-    console.log('🔑 Token details:', {
+    console.log(' Save toggle - Token found:', token ? 'Yes' : 'No');
+    console.log(' Token details:', {
       length: token ? token.length : 0,
       startsWith: token ? token.substring(0, 20) + '...' : 'None',
       endsWith: token ? '...' + token.substring(token.length - 20) : 'None'

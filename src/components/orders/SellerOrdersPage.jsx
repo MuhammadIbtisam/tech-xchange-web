@@ -75,40 +75,40 @@ const SellerOrdersPage = () => {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Loading seller orders...');
+      console.log(' Loading seller orders...');
       
       let ordersData = [];
       
       // Try to get orders from backend first
       try {
         const backendResponse = await orderService.getSellerOrders(token);
-        console.log('📦 Backend response:', backendResponse);
-        console.log('🔍 Backend response keys:', Object.keys(backendResponse));
-        console.log('🔍 Backend response.data keys:', backendResponse?.data ? Object.keys(backendResponse.data) : 'No data');
+        console.log(' Backend response:', backendResponse);
+        console.log(' Backend response keys:', Object.keys(backendResponse));
+        console.log(' Backend response.data keys:', backendResponse?.data ? Object.keys(backendResponse.data) : 'No data');
         
         if (backendResponse && backendResponse.data && backendResponse.data.orders) {
-          console.log('✅ Found orders in backendResponse.data.orders');
+          console.log(' Found orders in backendResponse.data.orders');
           ordersData = backendResponse.data.orders;
         } else if (backendResponse && backendResponse.orders) {
-          console.log('✅ Found orders in backendResponse.orders');
+          console.log(' Found orders in backendResponse.orders');
           ordersData = backendResponse.orders;
         } else if (backendResponse && Array.isArray(backendResponse)) {
-          console.log('✅ Backend response is an array');
+          console.log(' Backend response is an array');
           ordersData = backendResponse;
         } else if (backendResponse && backendResponse.data) {
-          console.log('✅ Found data in backendResponse.data');
+          console.log(' Found data in backendResponse.data');
           ordersData = backendResponse.data;
         } else {
-          console.log('❌ No orders found, setting empty array');
+          console.log(' No orders found, setting empty array');
           ordersData = [];
         }
         
         console.log('📋 Final ordersData:', ordersData);
-        console.log('🔍 Type of ordersData:', typeof ordersData, Array.isArray(ordersData));
-        console.log('🔍 Length of ordersData:', ordersData?.length);
+        console.log(' Type of ordersData:', typeof ordersData, Array.isArray(ordersData));
+        console.log(' Length of ordersData:', ordersData?.length);
         if (ordersData && ordersData.length > 0) {
-          console.log('🔍 Sample order structure:', ordersData[0]);
-          console.log('🔍 Available fields:', Object.keys(ordersData[0]));
+          console.log(' Sample order structure:', ordersData[0]);
+          console.log(' Available fields:', Object.keys(ordersData[0]));
         }
         
         // Ensure ordersData is an array before setting state
@@ -143,10 +143,10 @@ const SellerOrdersPage = () => {
       if (ordersData.length === 0) {
         message.info('No incoming orders found. You haven\'t received any orders yet.');
       } else {
-        console.log(`✅ Loaded ${ordersData.length} orders for seller`);
+        console.log(` Loaded ${ordersData.length} orders for seller`);
       }
     } catch (error) {
-      console.error('❌ Error loading seller orders:', error);
+      console.error(' Error loading seller orders:', error);
       message.error('Failed to load orders');
       setOrders([]);
     } finally {
@@ -174,19 +174,19 @@ const SellerOrdersPage = () => {
     try {
       console.log('🚀 Starting status update for order:', selectedOrder._id);
       console.log('📝 New status:', values.status);
-      console.log('🔑 Token present:', !!token);
+      console.log(' Token present:', !!token);
       
       // Try to update via backend API first
       await orderService.updateOrderStatus(selectedOrder._id, values.status, token, 'seller');
-      console.log('✅ Backend update successful');
+      console.log(' Backend update successful');
       message.success('Order status updated successfully via backend');
       setStatusUpdateModal(false);
       statusForm.resetFields();
       loadOrders(); // Reload orders
     } catch (error) {
-      console.error('❌ Backend API failed for status update:', error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error type:', typeof error);
+      console.error(' Backend API failed for status update:', error);
+      console.error(' Error message:', error.message);
+      console.error(' Error type:', typeof error);
       
       // Handle different types of errors
       if (error.message.includes('404')) {
@@ -250,11 +250,11 @@ const SellerOrdersPage = () => {
   };
 
   // Debug: Log orders state
-  console.log('🔍 Current orders state:', orders, 'Type:', typeof orders, 'IsArray:', Array.isArray(orders));
+  console.log(' Current orders state:', orders, 'Type:', typeof orders, 'IsArray:', Array.isArray(orders));
   
   // Safety check: Ensure orders is always an array
   const safeOrders = Array.isArray(orders) ? orders : [];
-  console.log('🔍 Safe orders array:', safeOrders, 'Length:', safeOrders.length);
+  console.log(' Safe orders array:', safeOrders, 'Length:', safeOrders.length);
   
   const stats = getOrderStats();
   const filteredOrders = getFilteredOrders();
@@ -449,7 +449,7 @@ const SellerOrdersPage = () => {
           className="mb-6"
           action={
             <Button size="small" type="link" onClick={() => {
-              console.log('🔍 Current order data structure:', orders[0]);
+              console.log(' Current order data structure:', orders[0]);
               message.info('Check console for data structure');
             }}>
               View Data Structure

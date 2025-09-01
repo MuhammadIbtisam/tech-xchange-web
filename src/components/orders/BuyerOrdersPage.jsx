@@ -63,31 +63,31 @@ const BuyerOrdersPage = () => {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      console.log('🔍 Loading buyer orders...');
+      console.log(' Loading buyer orders...');
       
       let ordersData = [];
       
       // Try to get orders from backend first
       try {
         const backendResponse = await orderService.getBuyerOrders(token);
-        console.log('📦 Backend response:', backendResponse);
-        console.log('🔍 Backend response keys:', Object.keys(backendResponse));
-        console.log('🔍 Backend response.data keys:', backendResponse?.data ? Object.keys(backendResponse.data) : 'No data');
+        console.log(' Backend response:', backendResponse);
+        console.log(' Backend response keys:', Object.keys(backendResponse));
+        console.log(' Backend response.data keys:', backendResponse?.data ? Object.keys(backendResponse.data) : 'No data');
         
         if (backendResponse && backendResponse.data && backendResponse.data.orders) {
-          console.log('✅ Found orders in backendResponse.data.orders');
+          console.log(' Found orders in backendResponse.data.orders');
           ordersData = backendResponse.data.orders;
         } else if (backendResponse && backendResponse.orders) {
-          console.log('✅ Found orders in backendResponse.orders');
+          console.log(' Found orders in backendResponse.orders');
           ordersData = backendResponse.orders;
         } else if (backendResponse && Array.isArray(backendResponse)) {
-          console.log('✅ Backend response is an array');
+          console.log(' Backend response is an array');
           ordersData = backendResponse;
         } else if (backendResponse && backendResponse.data) {
-          console.log('✅ Found data in backendResponse.data');
+          console.log(' Found data in backendResponse.data');
           ordersData = backendResponse.data;
         } else {
-          console.log('❌ No orders found in backend, trying context...');
+          console.log(' No orders found in backend, trying context...');
           ordersData = [];
         }
         
@@ -128,11 +128,11 @@ const BuyerOrdersPage = () => {
       if (ordersData.length === 0) {
         message.info('No orders found. You haven\'t placed any orders yet.');
       } else {
-        console.log(`✅ Loaded ${ordersData.length} orders for buyer`);
+        console.log(` Loaded ${ordersData.length} orders for buyer`);
       }
       
     } catch (error) {
-      console.error('❌ Error loading buyer orders:', error);
+      console.error(' Error loading buyer orders:', error);
       message.error('Failed to load orders');
       setOrders([]);
     } finally {
@@ -200,11 +200,11 @@ const BuyerOrdersPage = () => {
   };
 
   // Debug: Log orders state
-  console.log('🔍 Current buyer orders state:', orders, 'Type:', typeof orders, 'IsArray:', Array.isArray(orders));
+  console.log(' Current buyer orders state:', orders, 'Type:', typeof orders, 'IsArray:', Array.isArray(orders));
   
   // Safety check: Ensure orders is always an array
   const safeOrders = Array.isArray(orders) ? orders : [];
-  console.log('🔍 Safe buyer orders array:', safeOrders, 'Length:', safeOrders.length);
+  console.log(' Safe buyer orders array:', safeOrders, 'Length:', safeOrders.length);
   
   const stats = getOrderStats();
   const filteredOrders = getFilteredOrders();
@@ -237,7 +237,7 @@ const BuyerOrdersPage = () => {
             size="small" 
             type="text"
             onClick={() => {
-              console.log('🔍 Raw buyer order data:', record);
+              console.log(' Raw buyer order data:', record);
               message.info('Check console for raw data');
             }}
           >
@@ -390,7 +390,7 @@ const BuyerOrdersPage = () => {
           className="mb-6"
           action={
             <Button size="small" type="link" onClick={() => {
-              console.log('🔍 Current buyer order data structure:', orders[0]);
+              console.log(' Current buyer order data structure:', orders[0]);
               message.info('Check console for data structure');
             }}>
               View Data Structure

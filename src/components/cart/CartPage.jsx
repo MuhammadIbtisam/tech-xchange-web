@@ -118,7 +118,7 @@ const CartPage = ({ onBack }) => {
         throw new Error('User information not available. Please login again.');
       }
       
-      console.log(`🔍 User validation:`, { user: user, userId: user._id, userType: typeof user._id });
+      console.log(` User validation:`, { user: user, userId: user._id, userType: typeof user._id });
       
       // Create individual orders for each cart item
       const orders = [];
@@ -156,26 +156,26 @@ const CartPage = ({ onBack }) => {
         }
         
                 // Log the validated data structure
-        console.log(`🧪 Validated order data for ${item.name}:`, orderData);
+        console.log(` Validated order data for ${item.name}:`, orderData);
         console.log(`📋 Full order data JSON:`, JSON.stringify(orderData, null, 2));
-        console.log(`🔍 Shipping address details:`, orderData.shippingAddress);
+        console.log(` Shipping address details:`, orderData.shippingAddress);
         console.log(`👤 User object:`, user);
         console.log(`🆔 User ID being sent:`, user._id);
-        console.log(`🔑 buyerId in orderData:`, orderData.buyerId);
+        console.log(` buyerId in orderData:`, orderData.buyerId);
         
-        console.log(`📦 Creating order for product ${item.productId}:`, orderData);
-        console.log(`🔍 Product details:`, {
+        console.log(` Creating order for product ${item.productId}:`, orderData);
+        console.log(` Product details:`, {
           productId: item.productId,
           name: item.name,
           price: item.price,
           quantity: item.quantity
         });
-        console.log(`📤 Final order data being sent:`, JSON.stringify(orderData, null, 2));
+        console.log(` Final order data being sent:`, JSON.stringify(orderData, null, 2));
 
         try {
           // Create order for this product
           console.log(`🚀 Sending order request for ${item.name}...`);
-          console.log(`📤 Request details:`, {
+          console.log(` Request details:`, {
             productId: item.productId,
             orderData: orderData,
             token: token ? 'Present' : 'Missing',
@@ -192,7 +192,7 @@ const CartPage = ({ onBack }) => {
           orders.push(newOrder);
           
           // Add order to local context for immediate display
-          console.log('🔍 Full API response structure:', newOrder);
+          console.log(' Full API response structure:', newOrder);
           
           const orderForContext = {
             _id: newOrder.data?._id || newOrder.order?._id || newOrder._id || `order_${Date.now()}_${Math.random()}`,
@@ -210,18 +210,18 @@ const CartPage = ({ onBack }) => {
             estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
           };
           
-          console.log('📦 Order for context:', orderForContext);
+          console.log(' Order for context:', orderForContext);
           
           try {
             addOrder(orderForContext);
-            console.log(`✅ Order created for ${item.name}:`, newOrder);
-            console.log(`📦 Order added to context:`, orderForContext);
+            console.log(` Order created for ${item.name}:`, newOrder);
+            console.log(` Order added to context:`, orderForContext);
           } catch (contextError) {
             console.warn('⚠️ Failed to add order to context:', contextError);
             // Don't fail the checkout if context fails
           }
         } catch (error) {
-          console.error(`❌ Failed to create order for ${item.name}:`, error);
+          console.error(` Failed to create order for ${item.name}:`, error);
           
           // Provide more specific error information
           let errorMessage = error.message;
