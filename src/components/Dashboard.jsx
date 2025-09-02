@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Row, Col, Statistic, Progress, Typography, Space, Avatar, Button, Table, Tag, Badge } from 'antd';
-import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined, TeamOutlined, CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined, TeamOutlined, CheckOutlined, ClockCircleOutlined, HeartOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
 const { Title, Text } = Typography;
@@ -143,7 +143,7 @@ const Dashboard = ({ onNavigate }) => {
       return [
         { icon: <ShoppingCartOutlined />, label: 'Browse Products', action: () => onNavigate('2') }, // Products
         { icon: <EyeOutlined />, label: 'My Orders', action: () => onNavigate('7') }, // My Orders
-        { icon: <UserOutlined />, label: 'Profile', action: () => onNavigate('3') } // Profile
+        { icon: <HeartOutlined />, label: 'Saved Items', action: () => onNavigate('9') } // Saved Items
       ];
     } else if (isAdmin) {
       return [

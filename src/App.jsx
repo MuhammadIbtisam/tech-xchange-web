@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Menu, Button, Typography, Space, Avatar, Dropdown } from 'antd';
-import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined, MenuOutlined, CloseOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { UserOutlined, HomeOutlined, ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined, MenuOutlined, CloseOutlined, ShoppingCartOutlined, HeartOutlined } from '@ant-design/icons';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
@@ -9,6 +9,7 @@ import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
 import Profile from './components/Profile';
+import SavedItemsPage from './components/SavedItemsPage';
 import ProductsPage from './components/products/ProductsPage';
 import CartPage from './components/cart/CartPage';
 import ProductDetailPage from './components/products/ProductDetailPage';
@@ -97,6 +98,11 @@ const AppContent = () => {
       icon: <ShoppingOutlined />,
       label: 'My Orders',
     });
+    menuItems.push({
+      key: '9',
+      icon: <HeartOutlined />,
+      label: 'Saved Items',
+    });
   }
 
   // Add admin-specific menu items
@@ -144,6 +150,8 @@ const AppContent = () => {
         return <BuyerOrdersPage />;
       case '8':
         return <AdminProductsPage />;
+      case '9':
+        return <SavedItemsPage onProductView={setSelectedProduct} />;
       default:
         return <Dashboard onNavigate={setSelectedKey} />;
     }
@@ -259,6 +267,7 @@ const AppContent = () => {
               {selectedKey === '6' && <ShoppingOutlined className="text-white text-lg" />}
               {selectedKey === '7' && <ShoppingOutlined className="text-white text-lg" />}
               {selectedKey === '8' && <ShopOutlined className="text-white text-lg" />}
+              {selectedKey === '9' && <HeartOutlined className="text-white text-lg" />}
             </div>
             <Title level={3} className="mb-0 text-white font-bold">
               {selectedKey === '1' && 'Dashboard'}
@@ -269,6 +278,7 @@ const AppContent = () => {
               {selectedKey === '6' && 'Incoming Orders'}
               {selectedKey === '7' && 'My Orders'}
               {selectedKey === '8' && 'Product Management'}
+              {selectedKey === '9' && 'Saved Items'}
             </Title>
           </div>
           
