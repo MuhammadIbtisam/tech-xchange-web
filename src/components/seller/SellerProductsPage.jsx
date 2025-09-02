@@ -45,7 +45,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const SellerProductsPage = ({ onProductView }) => {
-  const { user, isAuthenticated, isSeller } = useAuth();
+  const { user, isAuthenticated, isSeller, token } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -64,7 +64,12 @@ const SellerProductsPage = ({ onProductView }) => {
   const loadMyProducts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        message.error('Authentication token not found. Please login again.');
+        return;
+      }
+      
       const response = await productService.getMyProducts(token);
       
       if (response.success) {
@@ -136,7 +141,12 @@ const SellerProductsPage = ({ onProductView }) => {
   const handleSubmit = async (values) => {
     try {
       setUploading(true);
-      const token = localStorage.getItem('token');
+      
+      // Use token from auth context instead of localStorage
+      if (!token) {
+        message.error('Authentication token not found. Please login again.');
+        return;
+      }
       
       // Try with minimal fields that should definitely work
       const productData = {
@@ -207,16 +217,24 @@ const SellerProductsPage = ({ onProductView }) => {
           token: token ? 'Present' : 'Missing'
         });
         
-        // For create, we need productTypeId - let's use a placeholder for now
-        // The backend expects this to be a valid MongoDB ObjectId
+        // For create, we need all required fields
         const createData = {
-          ...productData,
-          productTypeId: "68af3cfa18206ea57992f409" // Placeholder - this should come from a form selection
+          name: values.name || 'Test Product', // Required field
+          description: values.description || '',
+          price: Number(values.price),
+          categoryId: "68b5ef05f6d5de9e5f963ad2", // Laptops category
+          brandId: "68b5ef05f6d5de9e5f963ad9", // Apple brand
+          productTypeId: "68b5ef05f6d5de9e5f963ae3", // MacBook Pro 16"
+          condition: values.condition || 'new',
+          stock: Number(values.stock) || 1,
+          currency: 'USD'
         };
         
-        console.log(' Creating product with data:', createData);
+        console.log('🚀 Creating product with data:', createData);
+        console.log('📤 Sending to backend:', JSON.stringify(createData, null, 2));
         const createResponse = await productService.createProduct(createData, token);
-        console.log(' Create response:', createResponse);
+        console.log('📥 Backend response:', createResponse);
+        console.log('🔍 Product name in response:', createResponse?.product?.name);
         message.success('Product created successfully');
       }
       
@@ -299,7 +317,7 @@ const SellerProductsPage = ({ onProductView }) => {
           <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
             {record.images && record.images.length > 0 ? (
               <Image
-                alt={record.productTypeId?.name || record.name}
+                alt={record.name}
                 src={record.images[0]}
                 className="w-full h-full object-cover"
                 fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
@@ -312,10 +330,10 @@ const SellerProductsPage = ({ onProductView }) => {
           </div>
           <div className="min-w-0 flex-1">
             <Text strong className="block truncate">
-              {record.productTypeId?.name || record.name}
+              {record.name}
             </Text>
             <Text className="text-gray-500 text-sm block truncate">
-              {record.productTypeId?.brandId?.name} • {record.productTypeId?.categoryId?.displayName}
+              {record.productTypeId?.name} • {record.productTypeId?.brandId?.name} • {record.productTypeId?.categoryId?.displayName}
             </Text>
             <div className="flex items-center gap-2 mt-1">
               <Tag color={getConditionColor(record.condition)} size="small">

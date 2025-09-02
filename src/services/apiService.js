@@ -106,11 +106,17 @@ class ApiService {
     const headers = token ? getAuthHeaders(token) : API_CONFIG.DEFAULT_HEADERS;
     console.log('📋 Headers:', headers);
     
-    const result = await this.request(endpoint, {
+    // Only include body if data is provided and not empty
+    const requestOptions = {
       method: 'PUT',
       headers,
-      body: JSON.stringify(data),
-    });
+    };
+    
+    if (data && Object.keys(data).length > 0) {
+      requestOptions.body = JSON.stringify(data);
+    }
+    
+    const result = await this.request(endpoint, requestOptions);
     
     console.log('📥 ApiService.put result:', result);
     return result;

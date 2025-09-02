@@ -14,6 +14,7 @@ import ProductDetailPage from './components/products/ProductDetailPage';
 import SellerProductsPage from './components/seller/SellerProductsPage';
 import BuyerOrdersPage from './components/orders/BuyerOrdersPage';
 import SellerOrdersPage from './components/orders/SellerOrdersPage';
+import { AdminProductsPage } from './components/admin';
 
 const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -92,6 +93,15 @@ const AppContent = () => {
     });
   }
 
+  // Add admin-specific menu items
+  if (user?.role === 'admin') {
+    menuItems.push({
+      key: '7',
+      icon: <ShopOutlined />,
+      label: 'Product Management',
+    });
+  }
+
   const renderContent = () => {
     if (showCart) {
       return <CartPage onBack={() => setShowCart(false)} />;
@@ -124,6 +134,8 @@ const AppContent = () => {
         return <SellerOrdersPage />;
       case '6':
         return <BuyerOrdersPage />;
+      case '7':
+        return <AdminProductsPage />;
       default:
         return <Dashboard />;
     }
@@ -233,12 +245,18 @@ const AppContent = () => {
               {selectedKey === '2' && <ShoppingOutlined className="text-white text-lg" />}
               {selectedKey === '3' && <SettingOutlined className="text-white text-lg" />}
               {selectedKey === '4' && <ShopOutlined className="text-white text-lg" />}
+              {selectedKey === '5' && <ShoppingOutlined className="text-white text-lg" />}
+              {selectedKey === '6' && <ShoppingOutlined className="text-white text-lg" />}
+              {selectedKey === '7' && <ShopOutlined className="text-white text-lg" />}
             </div>
             <Title level={3} className="mb-0 text-white font-bold">
               {selectedKey === '1' && 'Dashboard'}
               {selectedKey === '2' && 'Products'}
               {selectedKey === '3' && 'Settings'}
               {selectedKey === '4' && 'My Products'}
+              {selectedKey === '5' && 'Incoming Orders'}
+              {selectedKey === '6' && 'My Orders'}
+              {selectedKey === '7' && 'Product Management'}
             </Title>
           </div>
           

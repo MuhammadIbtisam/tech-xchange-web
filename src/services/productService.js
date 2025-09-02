@@ -50,17 +50,25 @@ class ProductService {
 
   // Seller: Create new product
   async createProduct(productData, token) {
-    return await apiService.post('/products', productData, token);
+    console.log('🚀 Creating product:', productData);
+    try {
+      const response = await apiService.post('/products/seller', productData, token);
+      console.log('✅ Product created successfully:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Error creating product:', error);
+      throw error;
+    }
   }
 
   // Seller: Update product
   async updateProduct(productId, productData, token) {
-    return await apiService.put(`/products/${productId}`, productData, token);
+    return await apiService.put(`/products/seller/${productId}`, productData, token);
   }
 
   // Seller: Delete product
   async deleteProduct(productId, token) {
-    return await apiService.delete(`/products/${productId}`, token);
+    return await apiService.delete(`/products/seller/${productId}`, token);
   }
 
   // Seller: Get my products
@@ -89,12 +97,14 @@ class ProductService {
 
   // Admin: Approve product
   async approveProduct(productId, token) {
-    return await apiService.put(`/products/admin/${productId}/approve`, null, token);
+    // For approval, we don't need to send any data in the body
+    return await apiService.put(`/products/admin/${productId}/approve`, {}, token);
   }
 
   // Admin: Reject product
-  async rejectProduct(productId, token) {
-    return await apiService.put(`/products/admin/${productId}/reject`, null, token);
+  async rejectProduct(productId, token, adminNotes = '') {
+    const requestBody = adminNotes ? { adminNotes } : {};
+    return await apiService.put(`/products/admin/${productId}/reject`, requestBody, token);
   }
 
   // Admin: Get all products
