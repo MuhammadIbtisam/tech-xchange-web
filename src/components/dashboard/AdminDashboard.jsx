@@ -541,16 +541,33 @@ const AdminDashboard = () => {
         <Col span={24}>
           <Card title="Quick Actions">
             <Space size="large">
-              <Button type="primary" icon={<CheckOutlined />} size="large">
+              <Button 
+                type="primary" 
+                icon={<CheckOutlined />} 
+                size="large"
+                onClick={() => navigate('/admin/products')}
+              >
                 Review Pending Products
               </Button>
-              <Button icon={<TeamOutlined />} size="large">
+              <Button 
+                icon={<TeamOutlined />} 
+                size="large"
+                onClick={() => navigate('/admin/users')}
+              >
                 Manage Users
               </Button>
-              <Button icon={<BarChartOutlined />} size="large">
+              <Button 
+                icon={<BarChartOutlined />} 
+                size="large"
+                onClick={() => navigate('/admin/analytics')}
+              >
                 View Analytics
               </Button>
-              <Button icon={<SettingOutlined />} size="large">
+              <Button 
+                icon={<SettingOutlined />} 
+                size="large"
+                onClick={() => navigate('/settings')}
+              >
                 System Settings
               </Button>
             </Space>

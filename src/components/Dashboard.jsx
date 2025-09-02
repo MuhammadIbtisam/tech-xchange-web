@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const { Title, Text } = Typography;
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
   const { user, isSeller, isBuyer, isAdmin } = useAuth();
 
   // Role-specific statistics - only relevant data
@@ -135,21 +135,21 @@ const Dashboard = () => {
   const getQuickActions = () => {
     if (isSeller) {
       return [
-        { icon: <ShopOutlined />, label: 'Add Product', action: () => console.log('Navigate to Add Product') },
-        { icon: <ShoppingCartOutlined />, label: 'View Orders', action: () => console.log('Navigate to View Orders') },
-        { icon: <EyeOutlined />, label: 'Analytics', action: () => console.log('Navigate to Analytics') }
+        { icon: <ShopOutlined />, label: 'Add Product', action: () => onNavigate('5') }, // My Products
+        { icon: <ShoppingCartOutlined />, label: 'View Orders', action: () => onNavigate('6') }, // Incoming Orders
+        { icon: <UserOutlined />, label: 'Profile', action: () => onNavigate('3') } // Profile
       ];
     } else if (isBuyer) {
       return [
-        { icon: <ShoppingCartOutlined />, label: 'Browse Products', action: () => console.log('Navigate to Browse Products') },
-        { icon: <EyeOutlined />, label: 'My Orders', action: () => console.log('Navigate to My Orders') },
-        { icon: <UserOutlined />, label: 'Profile', action: () => console.log('Navigate to Profile') }
+        { icon: <ShoppingCartOutlined />, label: 'Browse Products', action: () => onNavigate('2') }, // Products
+        { icon: <EyeOutlined />, label: 'My Orders', action: () => onNavigate('7') }, // My Orders
+        { icon: <UserOutlined />, label: 'Profile', action: () => onNavigate('3') } // Profile
       ];
     } else if (isAdmin) {
       return [
-        { icon: <CheckOutlined />, label: 'Review Products', action: () => console.log('Navigate to Review Products') },
-        { icon: <TeamOutlined />, label: 'Manage Users', action: () => console.log('Navigate to Manage Users') },
-        { icon: <EyeOutlined />, label: 'System Status', action: () => console.log('Navigate to System Status') }
+        { icon: <CheckOutlined />, label: 'Review Products', action: () => onNavigate('8') }, // Product Management
+        { icon: <TeamOutlined />, label: 'Manage Users', action: () => onNavigate('3') }, // Profile (closest to user management)
+        { icon: <EyeOutlined />, label: 'System Status', action: () => onNavigate('4') } // Settings
       ];
     }
     return [];

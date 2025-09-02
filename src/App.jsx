@@ -8,6 +8,7 @@ import { OrderProvider, useOrder } from './context/OrderContext';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/Dashboard';
 import Settings from './components/Settings';
+import Profile from './components/Profile';
 import ProductsPage from './components/products/ProductsPage';
 import CartPage from './components/cart/CartPage';
 import ProductDetailPage from './components/products/ProductDetailPage';
@@ -65,6 +66,11 @@ const AppContent = () => {
     },
     {
       key: '3',
+      icon: <UserOutlined />,
+      label: 'Profile',
+    },
+    {
+      key: '4',
       icon: <SettingOutlined />,
       label: 'Settings',
     },
@@ -73,12 +79,12 @@ const AppContent = () => {
   // Add seller-specific menu items
   if (isSeller) {
     menuItems.push({
-      key: '4',
+      key: '5',
       icon: <ShopOutlined />,
       label: 'My Products',
     });
     menuItems.push({
-      key: '5',
+      key: '6',
       icon: <ShoppingOutlined />,
       label: 'Incoming Orders',
     });
@@ -87,7 +93,7 @@ const AppContent = () => {
   // Add buyer-specific menu items
   if (isBuyer) {
     menuItems.push({
-      key: '6',
+      key: '7',
       icon: <ShoppingOutlined />,
       label: 'My Orders',
     });
@@ -96,7 +102,7 @@ const AppContent = () => {
   // Add admin-specific menu items
   if (user?.role === 'admin') {
     menuItems.push({
-      key: '7',
+      key: '8',
       icon: <ShopOutlined />,
       label: 'Product Management',
     });
@@ -123,21 +129,23 @@ const AppContent = () => {
     
     switch (selectedKey) {
       case '1':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setSelectedKey} />;
       case '2':
         return <ProductsPage onProductView={setSelectedProduct} />;
       case '3':
-        return <Settings />;
+        return <Profile />;
       case '4':
-        return <SellerProductsPage onProductView={setSelectedProduct} />;
+        return <Settings />;
       case '5':
-        return <SellerOrdersPage />;
+        return <SellerProductsPage onProductView={setSelectedProduct} />;
       case '6':
-        return <BuyerOrdersPage />;
+        return <SellerOrdersPage />;
       case '7':
+        return <BuyerOrdersPage />;
+      case '8':
         return <AdminProductsPage />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setSelectedKey} />;
     }
   };
 
@@ -146,11 +154,13 @@ const AppContent = () => {
       key: 'profile',
       icon: <UserOutlined />,
       label: 'Profile',
+      onClick: () => setSelectedKey('3'), // Navigate to Profile page
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
       label: 'Settings',
+      onClick: () => setSelectedKey('4'), // Navigate to Settings page
     },
     {
       type: 'divider',
@@ -243,20 +253,22 @@ const AppContent = () => {
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
               {selectedKey === '1' && <HomeOutlined className="text-white text-lg" />}
               {selectedKey === '2' && <ShoppingOutlined className="text-white text-lg" />}
-              {selectedKey === '3' && <SettingOutlined className="text-white text-lg" />}
-              {selectedKey === '4' && <ShopOutlined className="text-white text-lg" />}
-              {selectedKey === '5' && <ShoppingOutlined className="text-white text-lg" />}
+              {selectedKey === '3' && <UserOutlined className="text-white text-lg" />}
+              {selectedKey === '4' && <SettingOutlined className="text-white text-lg" />}
+              {selectedKey === '5' && <ShopOutlined className="text-white text-lg" />}
               {selectedKey === '6' && <ShoppingOutlined className="text-white text-lg" />}
-              {selectedKey === '7' && <ShopOutlined className="text-white text-lg" />}
+              {selectedKey === '7' && <ShoppingOutlined className="text-white text-lg" />}
+              {selectedKey === '8' && <ShopOutlined className="text-white text-lg" />}
             </div>
             <Title level={3} className="mb-0 text-white font-bold">
               {selectedKey === '1' && 'Dashboard'}
               {selectedKey === '2' && 'Products'}
-              {selectedKey === '3' && 'Settings'}
-              {selectedKey === '4' && 'My Products'}
-              {selectedKey === '5' && 'Incoming Orders'}
-              {selectedKey === '6' && 'My Orders'}
-              {selectedKey === '7' && 'Product Management'}
+              {selectedKey === '3' && 'Profile'}
+              {selectedKey === '4' && 'Settings'}
+              {selectedKey === '5' && 'My Products'}
+              {selectedKey === '6' && 'Incoming Orders'}
+              {selectedKey === '7' && 'My Orders'}
+              {selectedKey === '8' && 'Product Management'}
             </Title>
           </div>
           

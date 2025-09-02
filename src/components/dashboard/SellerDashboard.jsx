@@ -464,16 +464,33 @@ const SellerDashboard = () => {
         <Col span={24}>
           <Card title="Quick Actions">
             <Space size="large">
-              <Button type="primary" icon={<PlusOutlined />} size="large">
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />} 
+                size="large"
+                onClick={() => navigate('/seller/products/new')}
+              >
                 Add New Product
               </Button>
-              <Button icon={<ShoppingOutlined />} size="large">
+              <Button 
+                icon={<ShoppingOutlined />} 
+                size="large"
+                onClick={() => navigate('/seller/orders')}
+              >
                 View All Orders
               </Button>
-              <Button icon={<TrendingUpOutlined />} size="large">
+              <Button 
+                icon={<TrendingUpOutlined />} 
+                size="large"
+                onClick={() => navigate('/seller/analytics')}
+              >
                 View Analytics
               </Button>
-              <Button icon={<UserOutlined />} size="large">
+              <Button 
+                icon={<UserOutlined />} 
+                size="large"
+                onClick={() => navigate('/profile')}
+              >
                 Manage Profile
               </Button>
             </Space>

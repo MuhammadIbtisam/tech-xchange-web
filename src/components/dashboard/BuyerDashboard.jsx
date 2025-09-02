@@ -559,16 +559,33 @@ const BuyerDashboard = () => {
         <Col span={24}>
           <Card title="Quick Actions">
             <Space size="large">
-              <Button type="primary" icon={<ShoppingCartOutlined />} size="large">
+              <Button 
+                type="primary" 
+                icon={<ShoppingCartOutlined />} 
+                size="large"
+                onClick={() => navigate('/products')}
+              >
                 Start Shopping
               </Button>
-              <Button icon={<EyeOutlined />} size="large">
+              <Button 
+                icon={<EyeOutlined />} 
+                size="large"
+                onClick={() => navigate('/orders')}
+              >
                 Track Orders
               </Button>
-              <Button icon={<HeartOutlined />} size="large">
+              <Button 
+                icon={<HeartOutlined />} 
+                size="large"
+                onClick={() => navigate('/saved-items')}
+              >
                 View Saved Items
               </Button>
-              <Button icon={<UserOutlined />} size="large">
+              <Button 
+                icon={<UserOutlined />} 
+                size="large"
+                onClick={() => navigate('/profile')}
+              >
                 Manage Profile
               </Button>
             </Space>

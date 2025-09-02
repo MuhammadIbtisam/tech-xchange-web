@@ -393,38 +393,8 @@ const Settings = () => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Settings */}
-      <Card title="Profile Settings" icon={<UserOutlined />}>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} md={12}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Display Name
-              </label>
-              <Input 
-                placeholder="Enter your display name" 
-                value={profile.displayName || ''}
-                onChange={(e) => handleProfileChange('displayName', e.target.value)}
-                ref={displayNameRef}
-              />
-            </div>
-          </Col>
-          <Col xs={24} md={12}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <Input 
-                type="email" 
-                placeholder="Enter your email" 
-                value={profile.email || ''}
-                onChange={(e) => handleProfileChange('email', e.target.value)}
-                ref={emailRef}
-              />
-            </div>
-          </Col>
-        </Row>
-        
+      {/* Application Settings */}
+      <Card title="Application Settings" icon={<SettingOutlined />}>
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <div className="mb-4">
