@@ -35,6 +35,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import productService from '../../services/productService';
 import ProductCard from './ProductCard';
+import { processProductsImages } from '../../utils/imageUtils';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -211,10 +212,14 @@ const ProductsPage = ({ onProductView }) => {
       console.log(' Products API Response:', response); // Debug log
       
       if (response.success) {
-        setProducts(response.products || []); // Changed from response.data to response.products
-        setTotalProducts(response.pagination?.totalProducts || 0); // Changed from total to totalProducts
-        console.log(' Products loaded:', response.products?.length || 0); // Debug log
-        console.log(' Pagination info:', response.pagination); // Debug log
+        // Process products to ensure image URLs are properly constructed
+        const processedProducts = processProductsImages(response.products || []);
+        
+        setProducts(processedProducts);
+        setTotalProducts(response.pagination?.totalProducts || 0);
+        console.log(' Products loaded:', processedProducts.length);
+        console.log(' Processed images:', processedProducts.map(p => ({ name: p.name, images: p.images })));
+        console.log(' Pagination info:', response.pagination);
       } else {
         message.error(response.message || 'Failed to load products');
       }
@@ -674,17 +679,7 @@ const ProductsPage = ({ onProductView }) => {
           {/* Action Buttons */}
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
             <div className="flex gap-2">
-              {isSeller && (
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => message.info('Add product functionality coming soon!')}
-                  size="small"
-                  className="text-xs"
-                >
-                  Add Product
-                </Button>
-              )}
+              
               <Button 
                 icon={<ReloadOutlined />}
                 onClick={handleRefresh}

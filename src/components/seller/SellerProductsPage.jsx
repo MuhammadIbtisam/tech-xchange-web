@@ -40,6 +40,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import productService from '../../services/productService';
 import { ProductReviews } from '../reviews';
+import ImageUpload from '../shared/ImageUpload';
+import { processProductsImages, processProductImages } from '../../utils/imageUtils';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -54,6 +56,7 @@ const SellerProductsPage = ({ onProductView }) => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [form] = Form.useForm();
   const [uploading, setUploading] = useState(false);
+  const [productImages, setProductImages] = useState([]);
 
   // Load seller's products
   useEffect(() => {
@@ -74,7 +77,10 @@ const SellerProductsPage = ({ onProductView }) => {
       const response = await productService.getMyProducts(token);
       
       if (response.success) {
-        setProducts(response.products || []);
+        // Process products to ensure image URLs are properly constructed
+        const processedProducts = processProductsImages(response.products || []);
+        setProducts(processedProducts);
+        console.log('📦 Loaded products with processed images:', processedProducts);
       } else {
         message.error('Failed to load products');
       }
@@ -701,6 +707,52 @@ const SellerProductsPage = ({ onProductView }) => {
             >
               <Input placeholder="phones, Apple, smartphone" />
             </Form.Item>
+
+            {/* Image Upload Section */}
+            {editingProduct && (
+              <Form.Item label="Product Images">
+                <ImageUpload
+                  productId={editingProduct._id}
+                  onUploadSuccess={(response) => {
+                    console.log('📸 Upload success response:', response);
+                    message.success('Images uploaded successfully');
+                    
+                    // Update the specific product with new images
+                    if (response.success && response.images && editingProduct) {
+                      const updatedProducts = products.map(product => {
+                        if (product._id === editingProduct._id) {
+                          // Process new images and add to existing ones
+                          const newImageUrls = response.images.map(imagePath => {
+                            if (imagePath.startsWith('http')) {
+                              return imagePath;
+                            }
+                            return `http://localhost:3000/${imagePath}`;
+                          });
+                          
+                          return {
+                            ...product,
+                            images: [...(product.images || []), ...newImageUrls]
+                          };
+                        }
+                        return product;
+                      });
+                      
+                      setProducts(updatedProducts);
+                      console.log('🔄 Updated products with new images:', updatedProducts);
+                    } else {
+                      // Fallback: reload all products
+                      loadMyProducts();
+                    }
+                  }}
+                  onUploadError={(error) => {
+                    message.error('Failed to upload images: ' + error.message);
+                  }}
+                  existingImages={editingProduct.images || []}
+                  maxFiles={10}
+                  maxSize={5}
+                />
+              </Form.Item>
+            )}
 
             <div className="flex justify-end gap-2">
               <Button onClick={() => setModalVisible(false)}>
