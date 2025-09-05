@@ -31,6 +31,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import productService from '../../services/productService';
+import { ProductReviews } from '../reviews';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -483,6 +484,16 @@ const ProductDetailPage = ({ product, onBack, onRefresh, onProductView }) => {
             </Card>
           </Col>
         </Row>
+
+        {/* Product Reviews */}
+        <div className="mt-12">
+          <Title level={3} className="mb-6">Customer Reviews</Title>
+          <ProductReviews 
+            productId={product._id}
+            productName={product.productTypeId?.name || product.name}
+            showReviewForm={isBuyer}
+          />
+        </div>
 
         {/* Related Products */}
         <div className="mt-12">

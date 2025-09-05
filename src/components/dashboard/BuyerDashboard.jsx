@@ -33,6 +33,7 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { ReviewForm, UserReviews } from '../reviews';
 
 const { Title, Text } = Typography;
 
@@ -55,6 +56,10 @@ const BuyerDashboard = () => {
   const [savedItems, setSavedItems] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
+  
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -254,6 +259,27 @@ const BuyerDashboard = () => {
     return icons[status] || <ClockCircleOutlined />;
   };
 
+  const handleReviewProduct = (order) => {
+    // Create a mock product object from the order data
+    const product = {
+      _id: order.productId || order._id,
+      name: order.productName,
+      productTypeId: {
+        name: order.productName
+      }
+    };
+    
+    setSelectedProduct(product);
+    setShowReviewModal(true);
+  };
+
+  const handleReviewSuccess = (reviewData) => {
+    setShowReviewModal(false);
+    setSelectedProduct(null);
+    // Optionally reload order history to show updated review status
+    loadOrderHistory();
+  };
+
   const orderColumns = [
     {
       title: 'Product',
@@ -301,7 +327,12 @@ const BuyerDashboard = () => {
             Track
           </Button>
           {record.status === 'delivered' && (
-            <Button size="small" type="primary" icon={<StarOutlined />}>
+            <Button 
+              size="small" 
+              type="primary" 
+              icon={<StarOutlined />}
+              onClick={() => handleReviewProduct(record)}
+            >
               Review
             </Button>
           )}
@@ -710,6 +741,13 @@ const BuyerDashboard = () => {
         </Col>
       </Row>
 
+      {/* My Reviews Section */}
+      <Row gutter={[24, 24]} className="mt-6">
+        <Col xs={24}>
+          <UserReviews />
+        </Col>
+      </Row>
+
       {/* Alerts */}
       {stats.pendingOrders > 0 && (
         <Alert
@@ -740,6 +778,19 @@ const BuyerDashboard = () => {
           }
         />
       )}
+
+      {/* Review Form Modal */}
+      <ReviewForm
+        productId={selectedProduct?._id}
+        productName={selectedProduct?.productTypeId?.name || selectedProduct?.name}
+        onSuccess={handleReviewSuccess}
+        onCancel={() => setShowReviewModal(false)}
+        visible={showReviewModal}
+        onClose={() => {
+          setShowReviewModal(false);
+          setSelectedProduct(null);
+        }}
+      />
     </div>
   );
 };

@@ -39,6 +39,7 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import productService from '../../services/productService';
+import { ProductReviews } from '../reviews';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -539,6 +540,52 @@ const SellerProductsPage = ({ onProductView }) => {
             </Empty>
           )}
         </Card>
+
+        {/* Product Reviews Section */}
+        {products.length > 0 && (
+          <Card
+            title="Product Reviews"
+            className="mt-6"
+          >
+            <div className="space-y-6">
+              {products.map((product) => (
+                <div key={product._id} className="border rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {product.images && product.images.length > 0 ? (
+                        <Image
+                          src={product.images[0]}
+                          alt={product.productTypeId?.name || product.name}
+                          className="w-full h-full object-cover"
+                          fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          📱
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Text strong className="block">
+                        {product.productTypeId?.name || product.name}
+                      </Text>
+                      <Text type="secondary" className="text-sm">
+                        {product.productTypeId?.brandId?.name || 'Unknown Brand'}
+                      </Text>
+                    </div>
+                  </div>
+                  
+                  <ProductReviews
+                    productId={product._id}
+                    productName={product.productTypeId?.name || product.name}
+                    showReviewForm={false}
+                    compact={true}
+                  />
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Add/Edit Product Modal */}
         <Modal
