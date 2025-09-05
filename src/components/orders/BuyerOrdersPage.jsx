@@ -52,7 +52,7 @@ const BuyerOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orderDetailModal] = useState(false);
+  const [orderDetailModal, setOrderDetailModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchText, setSearchText] = useState('');
 
@@ -343,16 +343,6 @@ const BuyerOrdersPage = () => {
               onClick={() => handleViewOrder(record)}
             />
           </Tooltip>
-          {record.status === 'pending' && (
-            <Tooltip title="Cancel Order">
-              <Button 
-                type="text" 
-                danger 
-                icon={<CloseCircleOutlined />} 
-                onClick={() => handleCancelOrder(record._id)}
-              />
-            </Tooltip>
-          )}
         </Space>
       ),
       width: 120

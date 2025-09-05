@@ -11,7 +11,7 @@ class ProductService {
     if (params.limit) queryParams.append('limit', params.limit);
     if (params.category) queryParams.append('category', params.category);
     if (params.brand) queryParams.append('brand', params.brand);
-    if (params.search) queryParams.append('search', params.search);
+    if (params.search !== undefined && params.search !== null) queryParams.append('search', params.search);
     if (params.minPrice) queryParams.append('minPrice', params.minPrice);
     if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice);
     if (params.sortBy) queryParams.append('sortBy', params.sortBy);
@@ -168,42 +168,14 @@ class ProductService {
   }
 
   // User: Get my saved items
-  async getMySavedItems(token, options = {}) {
-    const {
-      page = 1,
-      limit = 10,
-      search = '',
-      category = '',
-      minPrice = '',
-      maxPrice = '',
-      sortBy = 'dateAdded',
-      order = 'desc'
-    } = options;
-
-    console.log('🔄 Getting saved items with options:', { 
-      page, limit, search, category, minPrice, maxPrice, sortBy, order 
-    });
-
+  async getMySavedItems(token, page = 1, limit = 10) {
+    console.log(' Getting saved items:', { page, limit, token: token ? 'Present' : 'Missing' });
     try {
-      // Build query parameters
-      const params = new URLSearchParams();
-      params.append('page', page);
-      params.append('limit', limit);
-      
-      if (search) params.append('search', search);
-      if (category) params.append('category', category);
-      if (minPrice) params.append('minPrice', minPrice);
-      if (maxPrice) params.append('maxPrice', maxPrice);
-      if (sortBy) params.append('sortBy', sortBy);
-      if (order) params.append('order', order);
-
-      const endpoint = `/saved-items/user/my-saved-items?${params.toString()}`;
-      const response = await apiService.get(endpoint, token);
-      
-      console.log('📥 Get saved items response:', response);
+      const response = await apiService.get(`/saved-items/user/my-saved-items?page=${page}&limit=${limit}`, token);
+      console.log(' Get saved items response:', response);
       return response;
     } catch (error) {
-      console.error('❌ Get saved items error:', error);
+      console.error(' Get saved items error:', error);
       throw error;
     }
   }

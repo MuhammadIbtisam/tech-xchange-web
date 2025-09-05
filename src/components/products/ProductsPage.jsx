@@ -76,7 +76,7 @@ const ProductsPage = ({ onProductView }) => {
     loadInitialData();
   }, []);
 
-  // Load products when essential filters change (not search or price range)
+  // Load products when filters change
   useEffect(() => {
     // Don't load products on initial render - let loadInitialData handle it
     if (products.length > 0 || !loading) {
@@ -84,40 +84,63 @@ const ProductsPage = ({ onProductView }) => {
     }
   }, [currentPage, pageSize, selectedCategory, selectedBrand, sortBy, sortOrder]);
 
-  // Debounced search effect
+  // Reset applying filters state when products are loaded
   useEffect(() => {
-    if (searchTimerRef.current) {
-      clearTimeout(searchTimerRef.current);
+    if (applyingFilters) {
+      setApplyingFilters(false);
+    }
+  }, [products]);
+
+  // Simple search handler
+  const handleSearch = () => {
+    setCurrentPage(1); // Reset to first page
+    setApplyingFilters(true);
+    // The filtered products will be handled in the render
+  };
+
+  // Client-side filtering function
+  const getFilteredProducts = () => {
+    let filtered = [...products];
+
+    // Filter by search term (partial match in product name)
+    if (searchTerm && searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(product => 
+        product.name && product.name.toLowerCase().includes(searchLower)
+      );
     }
 
-    const timer = setTimeout(() => {
-      if (searchTerm !== undefined) {
-        setCurrentPage(1); // Reset to first page
-        setApplyingFilters(true);
-        loadProducts().finally(() => setApplyingFilters(false));
-      }
-    }, 500); // 500ms delay
+    // Filter by price range
+    if (priceRange[0] > 0 || priceRange[1] < 10000) {
+      filtered = filtered.filter(product => {
+        const price = product.price || 0;
+        return price >= priceRange[0] && price <= priceRange[1];
+      });
+    }
 
-    searchTimerRef.current = timer;
+    return filtered;
+  };
 
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [searchTerm]);
+  // Get filtered products for display
+  const filteredProducts = getFilteredProducts();
+  const filteredProductsCount = filteredProducts.length;
+  
+  // Paginate filtered products
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
   // Handle page size changes and ensure current page is valid
   useEffect(() => {
-    const maxPage = Math.ceil(totalProducts / pageSize);
-    console.log(' Pagination state:', { currentPage, pageSize, totalProducts, maxPage });
+    const maxPage = Math.ceil(filteredProductsCount / pageSize);
+    console.log(' Pagination state:', { currentPage, pageSize, filteredProductsCount, maxPage });
     
     // If current page exceeds max page, reset to max page
     if (currentPage > maxPage && maxPage > 0) {
       console.log('🔄 Resetting current page from', currentPage, 'to', maxPage);
       setCurrentPage(maxPage);
     }
-  }, [pageSize, totalProducts, currentPage]);
+  }, [pageSize, filteredProductsCount, currentPage]);
 
   // Debug logging for page and page size changes
   useEffect(() => {
@@ -128,26 +151,13 @@ const ProductsPage = ({ onProductView }) => {
     console.log('📏 Page size changed to:', pageSize);
   }, [pageSize]);
 
-  // Debounced price range effect
-  useEffect(() => {
-    if (searchTimerRef.current) {
-      clearTimeout(searchTimerRef.current);
-    }
-
-    const timer = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page
-      setApplyingFilters(true);
-      loadProducts().finally(() => setApplyingFilters(false));
-    }, 800); // 800ms delay for price range
-
-    searchTimerRef.current = timer;
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [priceRange]);
+  // Price range change handler
+  const handlePriceRangeChange = (value) => {
+    setPriceRange(value);
+    setCurrentPage(1); // Reset to first page
+    setApplyingFilters(true);
+    // The filtered products will be handled in the render
+  };
 
   const loadInitialData = async () => {
     try {
@@ -179,17 +189,18 @@ const ProductsPage = ({ onProductView }) => {
       const params = {
         page: currentPage,
         limit: pageSize,
-        search: searchTerm || undefined,
         category: selectedCategory || undefined,
         brand: selectedBrand || undefined,
-        minPrice: priceRange[0] || undefined,
-        maxPrice: priceRange[1] || undefined,
         sortBy: sortBy || undefined,
         order: sortOrder || undefined
       };
 
       // Remove undefined values
-      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+      Object.keys(params).forEach(key => {
+        if (params[key] === undefined) {
+          delete params[key];
+        }
+      });
 
       console.log(' Loading products with params:', params); // Debug log
       console.log(' Selected Category:', selectedCategory); // Debug log
@@ -213,11 +224,10 @@ const ProductsPage = ({ onProductView }) => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, searchTerm, selectedCategory, selectedBrand, priceRange, sortBy, sortOrder]);
+  }, [currentPage, pageSize, selectedCategory, selectedBrand, sortBy, sortOrder]);
 
-  const handleSearch = (value) => {
+  const handleSearchInput = (value) => {
     setSearchTerm(value);
-    // Don't call loadProducts here - let the debounced useEffect handle it
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -342,9 +352,11 @@ const ProductsPage = ({ onProductView }) => {
             <Search
               placeholder="Search products..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => handleSearchInput(e.target.value)}
+              onSearch={handleSearch}
               className="w-full"
               size="small"
+              enterButton="Search"
             />
           </div>
         </div>
@@ -376,7 +388,7 @@ const ProductsPage = ({ onProductView }) => {
               }
               size="large"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchInput(e.target.value)}
               onSearch={handleSearch}
               className="shadow-lg"
             />
@@ -528,7 +540,7 @@ const ProductsPage = ({ onProductView }) => {
             
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
-                {totalProducts} products
+                {filteredProductsCount} products
               </span>
               <Button 
                 type="text" 
@@ -613,7 +625,7 @@ const ProductsPage = ({ onProductView }) => {
                     max={10000}
                     step={100}
                     value={priceRange}
-                    onChange={(value) => handleFilterChange('price', value)}
+                    onChange={handlePriceRangeChange}
                     tipFormatter={(value) => `$${value}`}
                     className="w-full"
                     size="small"
@@ -717,7 +729,7 @@ const ProductsPage = ({ onProductView }) => {
             {/* Products Grid/List - Mobile Optimized */}
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
-                {products.map(product => (
+                {paginatedProducts.map(product => (
                   <div key={product._id} className="group">
                     <ProductCard
                       product={product}
@@ -732,7 +744,7 @@ const ProductsPage = ({ onProductView }) => {
               </div>
             ) : (
               <div className="space-y-3">
-                {products.map(product => (
+                {paginatedProducts.map(product => (
                   <div key={product._id} className="group">
                     <ProductCard
                       product={product}
@@ -767,8 +779,8 @@ const ProductsPage = ({ onProductView }) => {
                     <Option value={24}>24</Option>
                     <Option value={48}>48</Option>
                     <Option value={96}>96</Option>
-                    {totalProducts > 96 && (
-                      <Option value={totalProducts}>{totalProducts} (All)</Option>
+                    {filteredProductsCount > 96 && (
+                      <Option value={filteredProductsCount}>{filteredProductsCount} (All)</Option>
                     )}
                   </Select>
                 </div>
@@ -777,27 +789,27 @@ const ProductsPage = ({ onProductView }) => {
                   {/* Show current page info */}
                   <div className="flex flex-col items-center sm:items-start">
                     <span className="text-sm text-gray-600">
-                      {pageSize >= totalProducts ? (
-                        `Showing all ${totalProducts} products`
+                      {pageSize >= filteredProductsCount ? (
+                        `Showing all ${filteredProductsCount} products`
                       ) : (
-                        `Page ${currentPage} of ${Math.ceil(totalProducts / pageSize)}`
+                        `Page ${currentPage} of ${Math.ceil(filteredProductsCount / pageSize)}`
                       )}
                     </span>
-                    {pageSize < totalProducts && (
+                    {pageSize < filteredProductsCount && (
                       <span className="text-xs text-gray-500">
-                        {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalProducts)} of {totalProducts}
+                        {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, filteredProductsCount)} of {filteredProductsCount}
                       </span>
                     )}
                     {/* Show pagination status */}
-                    {pageSize < totalProducts && (
+                    {pageSize < filteredProductsCount && (
                       <span className="text-xs text-blue-600">
-                        {currentPage * pageSize > totalProducts ? 'Last page' : 'More pages available'}
+                        {currentPage * pageSize > filteredProductsCount ? 'Last page' : 'More pages available'}
                       </span>
                     )}
                   </div>
                   
                   {/* Simple Pagination */}
-                  {Math.ceil(totalProducts / pageSize) > 1 ? (
+                  {Math.ceil(filteredProductsCount / pageSize) > 1 ? (
                     <div className="flex items-center gap-2">
                       {/* Previous Button */}
                       <Button
@@ -811,13 +823,13 @@ const ProductsPage = ({ onProductView }) => {
                       
                       {/* Page Info */}
                       <span className="text-xs text-gray-600 px-2">
-                        Page {currentPage} of {Math.ceil(totalProducts / pageSize)}
+                        Page {currentPage} of {Math.ceil(filteredProductsCount / pageSize)}
                       </span>
                       
                       {/* Next Button */}
                       <Button
                         size="small"
-                        disabled={currentPage >= Math.ceil(totalProducts / pageSize)}
+                        disabled={currentPage >= Math.ceil(filteredProductsCount / pageSize)}
                         onClick={() => handlePageChange(currentPage + 1)}
                         className="text-xs"
                       >
@@ -833,7 +845,7 @@ const ProductsPage = ({ onProductView }) => {
                           placeholder="Page"
                           onPressEnter={(e) => {
                             const page = parseInt(e.target.value);
-                            if (page && page >= 1 && page <= Math.ceil(totalProducts / pageSize)) {
+                            if (page && page >= 1 && page <= Math.ceil(filteredProductsCount / pageSize)) {
                               handlePageChange(page);
                               e.target.value = '';
                             }
@@ -843,14 +855,14 @@ const ProductsPage = ({ onProductView }) => {
                     </div>
                   ) : (
                     <span className="text-xs text-gray-500">
-                      {pageSize >= totalProducts ? 'All products visible' : 'Single page'}
+                      {pageSize >= filteredProductsCount ? 'All products visible' : 'Single page'}
                     </span>
                   )}
                   
                   {/* Debug info and messages */}
                   <div className="flex flex-col gap-1">
                     {/* Show message when page size > total products */}
-                    {pageSize > totalProducts && (
+                    {pageSize > filteredProductsCount && (
                       <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded border border-orange-200">
                         All products visible
                       </span>
@@ -858,7 +870,7 @@ const ProductsPage = ({ onProductView }) => {
                     
                     {/* Debug info */}
                     <div className="text-xs text-gray-500">
-                      Debug: Page {currentPage}, Size {pageSize}, Total {totalProducts}, MaxPage {Math.ceil(totalProducts / pageSize)}
+                      Debug: Page {currentPage}, Size {pageSize}, Total {filteredProductsCount}, MaxPage {Math.ceil(filteredProductsCount / pageSize)}
                     </div>
                     
 

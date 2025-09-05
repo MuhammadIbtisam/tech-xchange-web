@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, Row, Col, Statistic, Progress, Typography, Space, Avatar, Button, Table, Tag, Badge } from 'antd';
-import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined, TeamOutlined, CheckOutlined, ClockCircleOutlined, HeartOutlined } from '@ant-design/icons';
+import { UserOutlined, ShoppingCartOutlined, DollarOutlined, RiseOutlined, ShopOutlined, EyeOutlined, TeamOutlined, CheckOutlined, ClockCircleOutlined, HeartOutlined, GlobalOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
+
 
 const { Title, Text } = Typography;
 
@@ -137,19 +138,22 @@ const Dashboard = ({ onNavigate }) => {
       return [
         { icon: <ShopOutlined />, label: 'Add Product', action: () => onNavigate('5') }, // My Products
         { icon: <ShoppingCartOutlined />, label: 'View Orders', action: () => onNavigate('6') }, // Incoming Orders
-        { icon: <UserOutlined />, label: 'Profile', action: () => onNavigate('3') } // Profile
+        { icon: <UserOutlined />, label: 'Profile', action: () => onNavigate('3') }, // Profile
+        { icon: <GlobalOutlined />, label: 'Tech News', action: () => onNavigate('10') }
       ];
     } else if (isBuyer) {
       return [
         { icon: <ShoppingCartOutlined />, label: 'Browse Products', action: () => onNavigate('2') }, // Products
         { icon: <EyeOutlined />, label: 'My Orders', action: () => onNavigate('7') }, // My Orders
-        { icon: <HeartOutlined />, label: 'Saved Items', action: () => onNavigate('9') } // Saved Items
+        { icon: <HeartOutlined />, label: 'Saved Items', action: () => onNavigate('9') },
+        { icon: <GlobalOutlined />, label: 'Tech News', action: () => onNavigate('10') } // Saved Items
       ];
     } else if (isAdmin) {
       return [
         { icon: <CheckOutlined />, label: 'Review Products', action: () => onNavigate('8') }, // Product Management
         { icon: <TeamOutlined />, label: 'Manage Users', action: () => onNavigate('3') }, // Profile (closest to user management)
-        { icon: <EyeOutlined />, label: 'System Status', action: () => onNavigate('4') } // Settings
+        { icon: <EyeOutlined />, label: 'System Status', action: () => onNavigate('4') }, // Settings
+        { icon: <GlobalOutlined />, label: 'Tech News', action: () => onNavigate('10') }
       ];
     }
     return [];
@@ -262,6 +266,8 @@ const Dashboard = ({ onNavigate }) => {
           </Card>
         </Col>
       </Row>
+
+
 
       {/* Quick Actions - Only relevant actions */}
       <Card title="Quick Actions">
